@@ -6,7 +6,8 @@ JETTA_DIESEL_SUPPORTED_PIDS_RESPONSE = '98 3B 80 19 '
 
 def test_decode_bitwise_pids_durango():
     """
-        Verify we correctly parse information about supported PIDs on a 1999 Dodge Durango
+        Verify we correctly parse information about supported PIDs on a 1999
+        Dodge Durango
     """
     supported_pids = decode_bitwise_pids(DURANGO_SUPPORTED_PIDS_RESPONSE)
     assert supported_pids == {
@@ -47,10 +48,11 @@ def test_decode_bitwise_pids_durango():
 
 def test_decode_bitwise_pids_jetta_diesel():
     """
-        Verify we correctly parse information about supported PIDs on a 2004 Jetta Diesel Wagon
+        Verify we correctly parse information about supported PIDs on a 2004
+        Jetta Diesel Wagon
     """
     supported_pids = decode_bitwise_pids(JETTA_DIESEL_SUPPORTED_PIDS_RESPONSE)
-    assert  supported_pids == {
+    assert supported_pids == {
         '01': True,
         '02': False,
         '03': False,

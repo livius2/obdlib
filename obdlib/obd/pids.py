@@ -1,7 +1,7 @@
 # Information about OBD-II PIDs
 # http://en.wikipedia.org/wiki/OBD-II_PIDs
 
-#PID hex codes
+# PID hex codes
 PIDS_SUPPORTED_00_20 = "00"
 MONITOR_STATUS_SINCE_DTC_CLEARED = "01"
 FREEZE_DTC = "02"
@@ -23,7 +23,7 @@ INTAKE_AIR_TEMPERATURE = "0F"
 MAF_AIR_FLOW = "10"
 THROTTLE_POSITION = "11"
 
-#TODO: Oxygen sensors
+# TODO: Oxygen sensors
 
 AUXILIARY_INPUT_STATUS = "1E"
 ENGINE_RUN_TIME_SINCE_START = "1F"
@@ -61,4 +61,4 @@ ENGINE_FUEL_RATE = "5E"
 PIDS_SUPPORTED_61_80 = "60"
 ENGINE_PERCENT_TORQUE = "64"
 
-#TODO: remaining PIDs
+# TODO: remaining PIDs

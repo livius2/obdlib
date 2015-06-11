@@ -10,15 +10,20 @@ from obd.fuel_type import FUEL_TYPE_DESCRIPTION
 def decode_bitwise_pids(hex_string):
     """
         Determine supported PIDs based on the supplied hexadecimal string
-        :param hex_string: a hexadecimal string representing bitwise encoded PID support
-        :return: a dictionary of PID number: boolean pairs that indicate whether or not a PID is supported
+        :param hex_string:a hex string representing bitwise encoded PID support
+        :return: a dictionary of PID number: boolean pairs that indicate
+        whether or not a PID is supported
     """
     clean_hex = hex_string.replace(' ', '')
     bits = bin(int(clean_hex, 16))[2:].zfill(32)
-    return dict((hex(i+1)[2:].zfill(2).upper(), True if value == '1' else False) for i, value in enumerate(bits))
+    return dict(
+            (hex(i + 1)[2:].zfill(2).upper(), True if value == '1' else False)
+            for i, value in enumerate(bits)
+           )
 
 
 class OBDScanner(object):
+
     """
         ELM327 OBD-II Scanner
 
@@ -35,7 +40,8 @@ class OBDScanner(object):
         self.connected = False
         self.elm_version = ""
         self.obd_protocol = ""
-        #Time to wait (in seconds) before attempting to receive data after an OBD command has been issued
+        # Time to wait (in seconds) before attempting to receive data after an
+        # OBD command has been issued
         self.receive_wait_time = 0.5
 
     def connect(self):
@@ -43,9 +49,13 @@ class OBDScanner(object):
             Opens a connection to an ELM327 OBD-II Interface
             :return:
         """
-        self.uart_port = uart.Connection(elm327.DEFAULT_PORTNAME, baudrate=elm327.DEFAULT_BAUDRATE,
-                                         bytesize=elm327.DEFAULT_BYTESIZE, parity=uart.PARITY_NONE,
-                                         stopbits=elm327.DEFAULT_STOPBITS, timeout=elm327.DEFAULT_TIMEOUT)
+        self.uart_port = uart.Connection(elm327.DEFAULT_PORTNAME,
+                                         baudrate=elm327.DEFAULT_BAUDRATE,
+                                         bytesize=elm327.DEFAULT_BYTESIZE,
+                                         parity=uart.PARITY_NONE,
+                                         stopbits=elm327.DEFAULT_STOPBITS,
+                                         timeout=elm327.DEFAULT_TIMEOUT)
+        # TODO: add validation
         self.initialize()
         self.connected = True
 
@@ -70,47 +80,54 @@ class OBDScanner(object):
 
     def clear_trouble_codes(self):
         """
-            Uses OBD Mode 04 to clear trouble codes and the malfunction indicator lamp (MIL) / check engine light
+            Uses OBD Mode 04 to clear trouble codes and the malfunction
+            indicator lamp (MIL) / check engine light
             :return:
         """
         self.send(commands.CLEAR_TROUBLE_CODES_COMMAND)
 
     def current_engine_coolant_temperature(self):
         """
-            Reads the vehicle's current engine coolant temperature from a connected OBD-II Scanner
+            Reads the vehicle's current engine coolant temperature from a
+            connected OBD-II Scanner
             :return: the current engine coolant temperature in degrees Celsius
         """
         self.send(commands.CURRENT_ENGINE_COOLANT_TEMP_COMMAND)
         response = self.receive()
         response_data = response.strip().split(' ')[-1]
-        #The data returned in the OBD response is in hexadecimal with a zero offset to account for negative temperatures
-        #To return the current temperature in degrees Celsius, we must first convert to decimal and then subtract 40
-        #to account for the zero offset.
+        # The data returned in the OBD response is in hexadecimal with a zero
+        # offset to account for negative temperatures. To return the current
+        # temperature in degrees Celsius, we must first convert to decimal and
+        # then subtract 40 to account for the zero offset.
         return int(response_data, 16) - 40
 
     def current_engine_oil_temperature(self):
         """
-            Reads the vehicle's current engine oil temperature from a connected OBD-II Scanner
+            Reads the vehicle's current engine oil temperature from a connected
+            OBD-II Scanner
             :return: the current engine oil temperature in degrees Celsius
         """
         self.send(commands.CURRENT_ENGINE_OIL_TEMP_COMMAND)
         response = self.receive()
         response_data = response.strip().split(' ')[-1]
-        #The data returned in the OBD response is in hexadecimal with a zero offset to account for negative temperatures
-        #To return the current temperature in degrees Celsius, we must first convert to decimal and then subtract 40
-        #to account for the zero offset.
+        # The data returned in the OBD response is in hexadecimal with a zero
+        # offset to account for negative temperatures. To return the current
+        # temperature in degrees Celsius, we must first convert to decimal and
+        # then subtract 40 to account for the zero offset.
         return int(response_data, 16) - 40
 
     def current_engine_rpm(self):
         """
-            Reads the vehicle's current engine RPM value from a connected OBD-II Scanner
+            Reads the vehicle's current engine RPM value from a connected
+            OBD-II Scanner
             :return: the current engine RPM
         """
         self.send(commands.CURRENT_ENGINE_RPM)
         response = self.receive()
         response_data = response.strip().split(' ')
         if len(response_data) >= 2:
-            rpm = (int(response_data[-2], 16) * 256 + int(response_data[-1], 16)) / 4
+            rpm = (int(response_data[-2], 16) * 256 +
+                   int(response_data[-1], 16)) / 4
             return rpm
         else:
             return None
@@ -169,7 +186,7 @@ class OBDScanner(object):
             :return: the data returned by the OBD-II Scanner
         """
         if self.connected:
-            #Wait for data to become available
+            # Wait for data to become available
             time.sleep(self.receive_wait_time)
             retry_number = 0
             value = ""
@@ -207,7 +224,8 @@ class OBDScanner(object):
     def send(self, data):
         """
             Send data/command to the connected OBD-II Scanner
-            :param data: the data/command to send to the connected OBD-II scanner
+            :param data: the data/command to send to the connected OBD-II
+            scanner
             :return:
         """
         if self.connected:

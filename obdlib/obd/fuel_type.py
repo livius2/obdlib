@@ -1,5 +1,5 @@
 
-#Mode 01 PID 51 returns a value for the vehicle's fuel type
+# Mode 01 PID 51 returns a value for the vehicle's fuel type
 
 FUEL_TYPE_DESCRIPTION = {
     0: 'Not Available',

@@ -1,11 +1,19 @@
 import time
-
 import uart
-
 import elm327
 from obd import commands
 from obd.fuel_type import FUEL_TYPE_DESCRIPTION
 
+def zfill(string, width):
+    """
+        Wrapper for str.zfill which is not exists in micropython
+        :param string: a string for alignment
+        :param width: width of the resulted string
+        :return: a string that has been aligned to the width
+    """
+    return string.zfill(width)
+           if hasattr(string, 'zfill') else
+           ('{0:0%d}'%(width)).format(int(string))
 
 def decode_bitwise_pids(hex_string):
     """
@@ -15,9 +23,9 @@ def decode_bitwise_pids(hex_string):
         whether or not a PID is supported
     """
     clean_hex = hex_string.replace(' ', '')
-    bits = bin(int(clean_hex, 16))[2:].zfill(32)
+    bits = zfill(bin(int(clean_hex, 16))[2:], 32)
     return dict(
-            (hex(i + 1)[2:].zfill(2).upper(), True if value == '1' else False)
+            (zfill(hex(i + 1)[2:],2).upper(), True if value == '1' else False)
             for i, value in enumerate(bits)
            )
 

@@ -64,11 +64,5 @@ See LICENSE_ for details.
 .. _LICENSE:
     LICENSE.txt
 
-.. | version | image:
-    :
-        https:
-            //badge.fury.io / py / obdlib.svg
-    :
-        target:
-            https:
-                //pypi.python.org / pypi / obdlib/
+.. | version | image:: https://badge.fury.io/py/obdlib.svg
+    :target: https://pypi.python.org/pypi/obdlib/

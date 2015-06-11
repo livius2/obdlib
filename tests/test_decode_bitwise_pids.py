@@ -1,4 +1,4 @@
-from obdlib.obd.scanner import decode_bitwise_pids
+from obdlib.scanner import decode_bitwise_pids
 
 DURANGO_SUPPORTED_PIDS_RESPONSE = 'BE 3E B8 10 '
 JETTA_DIESEL_SUPPORTED_PIDS_RESPONSE = '98 3B 80 19 '

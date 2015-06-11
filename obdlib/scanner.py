@@ -11,8 +11,8 @@ def zfill(string, width):
         :param width: width of the resulted string
         :return: a string that has been aligned to the width
     """
-    return string.zfill(width)
-           if hasattr(string, 'zfill') else
+    return string.zfill(width) \
+           if hasattr(string, 'zfill') else\
            ('{0:0%d}'%(width)).format(int(string))
 
 def decode_bitwise_pids(hex_string):

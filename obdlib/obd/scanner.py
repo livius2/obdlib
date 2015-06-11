@@ -3,9 +3,9 @@ import time
 
 import serial
 
-from shadetree import elm327
-from shadetree.obd import commands
-from shadetree.obd.fuel_type import FUEL_TYPE_DESCRIPTION
+from obdlib import elm327
+from obdlib.obd import commands
+from obdlib.obd.fuel_type import FUEL_TYPE_DESCRIPTION
 
 
 def decode_bitwise_pids(hex_string):

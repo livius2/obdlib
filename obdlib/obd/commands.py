@@ -1,5 +1,5 @@
-from shadetree.obd import modes
-from shadetree.obd import pids
+from obdlib.obd import modes
+from obdlib.obd import pids
 
 VEHICLE_ID_NUMBER_COMMAND = '{0} {1}'.format(modes.VEHICLE_INFORMATION_DATA, pids.VEHICLE_IDENTIFICATION_NUMBER)
 ECU_NAME_COMMAND = '{0} {1}'.format(modes.VEHICLE_INFORMATION_DATA, pids.ECU_NAME)

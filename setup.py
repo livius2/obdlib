@@ -1,26 +1,21 @@
 """
-ShadeTree OBD
+OBD Library
 -------------
 
-A Python library to help the Shade Tree Mechanic easily interface with OBD-II scanners
+A Python interface to OBD-II scanners
 
-ShadeTree OBD is distributed under the MIT License.
 """
 from setuptools import setup
 
-
 setup(
-    name="shadetree",
+    name="obdlib",
     version="0.1",
     license="MIT",
-    author="HUB-OLOGY",
-    author_email="corbinbs@hubology.org",
-    url="http://hub-ology.org",
-    download_url = 'https://github.com/corbinbs/shadetree/tarball/0.1',
-    description="ShadeTree OBD",
+    author="Siarhei Boika",
+    author_email="s.s.boika@gmail.com",
+    description="OBD Library",
     long_description=__doc__,
-    packages=["shadetree", "shadetree.obd"],
-    scripts=["bin/shadetree"],
+    packages=["obdlib", "obdlib.obd"],
     zip_safe=False,
     include_package_data=True,
     platforms="any",
@@ -29,13 +24,12 @@ setup(
     ],
     tests_require=[
         "nose",
-        "tox"
     ],
-    test_suite = 'nose.collector',
-    keywords = ['obd', 'obdii', 'automotive'],
+    test_suite='nose.collector',
+    keywords=['obd', 'obdii', 'automotive'],
     classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Environment :: Web Environment",
+        "Development Status :: 1 - Planning",
+        "Environment :: Console",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "License :: OSI Approved :: MIT License",
@@ -43,6 +37,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: Micropython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Communications",
         "Topic :: Scientific/Engineering :: Information Analysis",

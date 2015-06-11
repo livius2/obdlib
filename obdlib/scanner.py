@@ -1,11 +1,10 @@
-from __future__ import absolute_import
 import time
 
-import serial
+import uart
 
-from obdlib import elm327
-from obdlib.obd import commands
-from obdlib.obd.fuel_type import FUEL_TYPE_DESCRIPTION
+import elm327
+from obd import commands
+from obd.fuel_type import FUEL_TYPE_DESCRIPTION
 
 
 def decode_bitwise_pids(hex_string):
@@ -32,7 +31,7 @@ class OBDScanner(object):
     """
 
     def __init__(self):
-        self.serial_port = None
+        self.uart_port = None
         self.connected = False
         self.elm_version = ""
         self.obd_protocol = ""
@@ -44,8 +43,8 @@ class OBDScanner(object):
             Opens a connection to an ELM327 OBD-II Interface
             :return:
         """
-        self.serial_port = serial.Serial(elm327.DEFAULT_PORTNAME, baudrate=elm327.DEFAULT_BAUDRATE,
-                                         bytesize=elm327.DEFAULT_BYTESIZE, parity=serial.PARITY_NONE,
+        self.uart_port = uart.Connection(elm327.DEFAULT_PORTNAME, baudrate=elm327.DEFAULT_BAUDRATE,
+                                         bytesize=elm327.DEFAULT_BYTESIZE, parity=uart.PARITY_NONE,
                                          stopbits=elm327.DEFAULT_STOPBITS, timeout=elm327.DEFAULT_TIMEOUT)
         self.initialize()
         self.connected = True
@@ -148,7 +147,7 @@ class OBDScanner(object):
         """
         if self.connected:
             self.reset()
-            self.serial_port.close()
+            self.uart_port.close()
         self.connected = False
         self.elm_version = ""
 
@@ -175,7 +174,7 @@ class OBDScanner(object):
             retry_number = 0
             value = ""
             while True:
-                data = self.serial_port.read(1)
+                data = self.uart_port.read(1)
 
                 if data == '>':
                     break
@@ -212,9 +211,9 @@ class OBDScanner(object):
             :return:
         """
         if self.connected:
-            self.serial_port.flushOutput()
-            self.serial_port.flushInput()
-            self.serial_port.write(data + "\r\n")
+            self.uart_port.flushOutput()
+            self.uart_port.flushInput()
+            self.uart_port.write(data + "\r\n")
 
     def supported_pids(self):
         self.send(commands.CURRENT_MODE_PIDS_SUPPORTED_COMMAND)

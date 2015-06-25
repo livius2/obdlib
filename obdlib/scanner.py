@@ -1,37 +1,14 @@
 import time
 import uart
 import elm327
+import decode
 from obd import commands
+from obd import sensors
+from response import Response
 from obd.fuel_type import FUEL_TYPE_DESCRIPTION
-
-def zfill(string, width):
-    """
-        Wrapper for str.zfill which is not exists in micropython
-        :param string: a string for alignment
-        :param width: width of the resulted string
-        :return: a string that has been aligned to the width
-    """
-    return string.zfill(width) \
-           if hasattr(string, 'zfill') else\
-           ('{0:0%d}'%(width)).format(int(string))
-
-def decode_bitwise_pids(hex_string):
-    """
-        Determine supported PIDs based on the supplied hexadecimal string
-        :param hex_string:a hex string representing bitwise encoded PID support
-        :return: a dictionary of PID number: boolean pairs that indicate
-        whether or not a PID is supported
-    """
-    clean_hex = hex_string.replace(' ', '')
-    bits = zfill(bin(int(clean_hex, 16))[2:], 32)
-    return dict(
-            (zfill(hex(i + 1)[2:],2).upper(), True if value == '1' else False)
-            for i, value in enumerate(bits)
-           )
 
 
 class OBDScanner(object):
-
     """
         ELM327 OBD-II Scanner
 
@@ -40,32 +17,35 @@ class OBDScanner(object):
 
         Additional details about EML327 OBD <-> RS232 found here:
         http://elmelectronics.com/DSheets/ELM327DS.pdf
-
     """
 
-    def __init__(self):
+    def __init__(self, pb_str, baud=uart.DEFAULT_BAUDRATE):
+        self.pb_str = pb_str
+        self.baud = baud
         self.uart_port = None
-        self.connected = False
         self.elm_version = ""
         self.obd_protocol = ""
         # Time to wait (in seconds) before attempting to receive data after an
         # OBD command has been issued
         self.receive_wait_time = 0.5
+        self.success = "OK"
+        # the data object returned by the OBD-II Scanner
+        self.__response = None
+        self.sensor = None
 
     def connect(self):
         """
             Opens a connection to an ELM327 OBD-II Interface
             :return:
         """
-        self.uart_port = uart.Connection(elm327.DEFAULT_PORTNAME,
-                                         baudrate=elm327.DEFAULT_BAUDRATE,
-                                         bytesize=elm327.DEFAULT_BYTESIZE,
-                                         parity=uart.PARITY_NONE,
-                                         stopbits=elm327.DEFAULT_STOPBITS,
-                                         timeout=elm327.DEFAULT_TIMEOUT)
-        # TODO: add validation
-        self.initialize()
-        self.connected = True
+        self.uart_port = uart.UART().connection(self.pb_str, baudrate=self.baud)
+
+        if self.is_connected():
+            self.initialize()
+
+    def is_connected(self):
+        """ Returns a boolean for whether a successful connection was made """
+        return self.uart_port is not None
 
     def __enter__(self):
         """
@@ -124,29 +104,12 @@ class OBDScanner(object):
         # then subtract 40 to account for the zero offset.
         return int(response_data, 16) - 40
 
-    def current_engine_rpm(self):
-        """
-            Reads the vehicle's current engine RPM value from a connected
-            OBD-II Scanner
-            :return: the current engine RPM
-        """
-        self.send(commands.CURRENT_ENGINE_RPM)
-        response = self.receive()
-        response_data = response.strip().split(' ')
-        if len(response_data) >= 2:
-            rpm = (int(response_data[-2], 16) * 256 +
-                   int(response_data[-1], 16)) / 4
-            return rpm
-        else:
-            return None
-
     def ecu_name(self):
         """
             Returns the name of the Engine Control Unit (ECU)
             :return: the name of the ECU (if available)
         """
-        self.send(commands.ECU_NAME_COMMAND)
-        return self.receive()
+        return self.send(commands.ECU_NAME_COMMAND)
 
     def fuel_type(self):
         """
@@ -161,19 +124,19 @@ class OBDScanner(object):
     def echo_off(self):
         """
             Turns ECHO OFF for the OBD-II Scanner
-            :return:
+            :return response data
         """
-        self.send(elm327.ECHO_OFF_COMMAND)
+        return self.send(elm327.ECHO_OFF_COMMAND).raw_value
 
     def disconnect(self):
         """
             Disconnect from a connected OBD-II Scanner
             :return:
         """
-        if self.connected:
+        if self.is_connected():
             self.reset()
             self.uart_port.close()
-        self.connected = False
+        self.uart_port = None
         self.elm_version = ""
 
     def initialize(self):
@@ -181,28 +144,33 @@ class OBDScanner(object):
             Initialize the OBD-II Scanner state after connecting
             :return:
         """
-        self.reset()
-        self.echo_off()
-        self.send(elm327.SET_PROTOCOL_AUTO_COMMAND)
-        self.receive()
-        self.send(elm327.DESCRIBE_PROTOCOL_COMMAND)
-        self.obd_protocol = self.receive()
+        # self.reset()
+        if not self._check_response(self.echo_off()):
+            # logging error
+            print("ATE0 did not return success")
+        if not self._check_response(self.send(elm327.SET_PROTOCOL_AUTO_COMMAND).raw_value):
+            # logging error
+            print("ATE0 did not return success")
+        self.obd_protocol = self.send(elm327.DESCRIBE_PROTOCOL_COMMAND).raw_value
+        self.sensor = sensors.Command(self.send)
 
     def receive(self):
         """
             Receive data from connected OBD-II Scanner
             :return: the data returned by the OBD-II Scanner
         """
-        if self.connected:
-            # Wait for data to become available
-            time.sleep(self.receive_wait_time)
+        if self.is_connected():
             retry_number = 0
-            value = ""
+            value = b''
             while True:
                 data = self.uart_port.read(1)
 
-                if data == '>':
+                if data == b'>':
                     break
+
+                # ignore incoming bytes that are of value 00 (NULL)
+                if data == b'\x00':
+                    continue
 
                 if len(data) == 0:
                     if retry_number >= elm327.DEFAULT_RETRIES:
@@ -210,13 +178,13 @@ class OBDScanner(object):
                     retry_number += 1
                     continue
 
-                if data == '\r':
-                    continue
-
                 value += data
 
             if value:
-                return value
+                return Response(value)
+        else:
+            # logging warning
+            print "Cannot read when unconnected"
 
         return None
 
@@ -225,26 +193,30 @@ class OBDScanner(object):
             Reset the OBD-II Scanner
             :return:
         """
-        if self.connected:
-            self.send(elm327.RESET_COMMAND)
+        if self.is_connected():
+            self.send(elm327.RESET_COMMAND, 1)
             self.elm_version = self.receive()
 
-    def send(self, data):
+    def send(self, data, delay=None):
         """
             Send data/command to the connected OBD-II Scanner
             :param data: the data/command to send to the connected OBD-II
             scanner
-            :return:
+            :param delay: the delay between write and read, in sec
+            :return the data returned by the OBD-II Scanner
         """
-        if self.connected:
-            self.uart_port.flushOutput()
-            self.uart_port.flushInput()
-            self.uart_port.write(data + "\r\n")
+        if self.is_connected():
+            self._write(data)
+
+        # Wait for data to become available
+        if delay:
+            time.sleep(delay)
+
+        return self.receive()
 
     def supported_pids(self):
-        self.send(commands.CURRENT_MODE_PIDS_SUPPORTED_COMMAND)
-        response = self.receive()
-        return decode_bitwise_pids(response)
+        response = self.send(commands.CURRENT_MODE_PIDS_SUPPORTED_COMMAND)
+        return decode.decode_bitwise_pids(response.value)
 
     def vehicle_id_number(self):
         """
@@ -253,3 +225,20 @@ class OBDScanner(object):
         """
         self.send(commands.VEHICLE_ID_NUMBER_COMMAND)
         return self.receive()
+
+    def _check_response(self, data):
+        """
+            Checks the common command
+        """
+        return self.success in data
+
+    def _write(self, data):
+        """
+            Send data/command to the connected OBD-II Scanner
+            :param data: the data/command to send to the connected OBD-II
+            scanner
+            :return:
+        """
+        self.uart_port.flushOutput()
+        self.uart_port.flushInput()
+        self.uart_port.write(data + "\r\n")

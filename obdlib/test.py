@@ -6,7 +6,7 @@ import time
 with scanner.OBDScanner("/dev/pts/5") as scan:
     while True:
         data = {}
-        for sensor in scan.sensor.sensors(mode=01):
+        for sensor in scan.sensor.sensors(mode=1):
             # gets available sensor value only
             data[sensor.title] = sensor.value
         print("---------------------------------------")
@@ -17,6 +17,6 @@ with scanner.OBDScanner("/dev/pts/5") as scan:
 with scanner.OBDScanner("/dev/pts/5") as scan:
     while True:
         # Engine coolant temperature
-        sensor = scan.sensor[01](05)
+        sensor = scan.sensor[1](5)
         print("Sensor {}: {} {}".format(sensor.title, sensor.value, sensor.unit))
         time.sleep(0.5)

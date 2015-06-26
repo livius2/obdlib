@@ -1,11 +1,9 @@
 import time
 import uart
 import elm327
-import decode
 from obd import commands
 from obd import sensors
 from response import Response
-from obd.fuel_type import FUEL_TYPE_DESCRIPTION
 
 
 class OBDScanner(object):
@@ -19,19 +17,26 @@ class OBDScanner(object):
         http://elmelectronics.com/DSheets/ELM327DS.pdf
     """
 
-    def __init__(self, pb_str, baud=uart.DEFAULT_BAUDRATE):
+    def __init__(self, pb_str, baud=uart.DEFAULT_BAUDRATE, units=0):
+        """
+            Init params
+            :param pb_str: port or bus number|name
+            :param baud: it is the clock rate
+            :param units: default units for system readings (0 - Europe, 1 - English)
+        """
         self.pb_str = pb_str
         self.baud = baud
         self.uart_port = None
         self.elm_version = ""
         self.obd_protocol = ""
+        self.units = units
         # Time to wait (in seconds) before attempting to receive data after an
         # OBD command has been issued
         self.receive_wait_time = 0.5
         self.success = "OK"
-        # the data object returned by the OBD-II Scanner
-        self.__response = None
         self.sensor = None
+        # it does prove that the connection with a vehicle is working
+        self.__connected = False
 
     def connect(self):
         """
@@ -40,11 +45,11 @@ class OBDScanner(object):
         """
         self.uart_port = uart.UART().connection(self.pb_str, baudrate=self.baud)
 
-        if self.is_connected():
+        if self.is_port():
             self.initialize()
 
-    def is_connected(self):
-        """ Returns a boolean for whether a successful connection was made """
+    def is_port(self):
+        """ Returns a boolean for whether a successful connection with port was made """
         return self.uart_port is not None
 
     def __enter__(self):
@@ -63,80 +68,17 @@ class OBDScanner(object):
             Reads the vehicle's battery voltage from a connected OBD-II Scanner
             :return: the battery voltage returned by the OBD-II Scanner
         """
-        self.send(elm327.BATTERY_VOLTAGE_COMMAND)
-        return self.receive()
-
-    def clear_trouble_codes(self):
-        """
-            Uses OBD Mode 04 to clear trouble codes and the malfunction
-            indicator lamp (MIL) / check engine light
-            :return:
-        """
-        self.send(commands.CLEAR_TROUBLE_CODES_COMMAND)
-
-    def current_engine_coolant_temperature(self):
-        """
-            Reads the vehicle's current engine coolant temperature from a
-            connected OBD-II Scanner
-            :return: the current engine coolant temperature in degrees Celsius
-        """
-        self.send(commands.CURRENT_ENGINE_COOLANT_TEMP_COMMAND)
-        response = self.receive()
-        response_data = response.strip().split(' ')[-1]
-        # The data returned in the OBD response is in hexadecimal with a zero
-        # offset to account for negative temperatures. To return the current
-        # temperature in degrees Celsius, we must first convert to decimal and
-        # then subtract 40 to account for the zero offset.
-        return int(response_data, 16) - 40
-
-    def current_engine_oil_temperature(self):
-        """
-            Reads the vehicle's current engine oil temperature from a connected
-            OBD-II Scanner
-            :return: the current engine oil temperature in degrees Celsius
-        """
-        self.send(commands.CURRENT_ENGINE_OIL_TEMP_COMMAND)
-        response = self.receive()
-        response_data = response.strip().split(' ')[-1]
-        # The data returned in the OBD response is in hexadecimal with a zero
-        # offset to account for negative temperatures. To return the current
-        # temperature in degrees Celsius, we must first convert to decimal and
-        # then subtract 40 to account for the zero offset.
-        return int(response_data, 16) - 40
-
-    def ecu_name(self):
-        """
-            Returns the name of the Engine Control Unit (ECU)
-            :return: the name of the ECU (if available)
-        """
-        return self.send(commands.ECU_NAME_COMMAND)
-
-    def fuel_type(self):
-        """
-            Reads the vehicle's fuel type from a connected OBD-II Scanner
-            :return: a description of the type of fuel used by the vehicle
-        """
-        self.send(commands.FUEL_TYPE_COMMAND)
-        response = self.receive()
-        response_data = response.strip().split(' ')[-1]
-        return FUEL_TYPE_DESCRIPTION.get(int(response_data, 16))
-
-    def echo_off(self):
-        """
-            Turns ECHO OFF for the OBD-II Scanner
-            :return response data
-        """
-        return self.send(elm327.ECHO_OFF_COMMAND).raw_value
+        return self.send(elm327.BATTERY_VOLTAGE_COMMAND)
 
     def disconnect(self):
         """
             Disconnect from a connected OBD-II Scanner
             :return:
         """
-        if self.is_connected():
+        if self.is_port():
             self.reset()
             self.uart_port.close()
-        self.uart_port = None
+        self.__connected = None
         self.elm_version = ""
 
     def initialize(self):
@@ -151,15 +93,19 @@ class OBDScanner(object):
         if not self._check_response(self.send(elm327.SET_PROTOCOL_AUTO_COMMAND).raw_value):
             # logging error
             print("ATE0 did not return success")
+
         self.obd_protocol = self.send(elm327.DESCRIBE_PROTOCOL_COMMAND).raw_value
-        self.sensor = sensors.Command(self.send)
+        self.sensor = sensors.Command(self.send, self.units)
+
+        # checks connection with vehicle
+        self.__connected = self.sensor.check_pids()
 
     def receive(self):
         """
             Receive data from connected OBD-II Scanner
             :return: the data returned by the OBD-II Scanner
         """
-        if self.is_connected():
+        if self.is_port():
             retry_number = 0
             value = b''
             while True:
@@ -184,7 +130,7 @@ class OBDScanner(object):
                 return Response(value)
         else:
             # logging warning
-            print "Cannot read when unconnected"
+            print("Cannot read when unconnected")
 
         return None
 
@@ -193,7 +139,7 @@ class OBDScanner(object):
             Reset the OBD-II Scanner
             :return:
         """
-        if self.is_connected():
+        if self.is_port():
             self.send(elm327.RESET_COMMAND, 1)
             self.elm_version = self.receive()
 
@@ -205,7 +151,7 @@ class OBDScanner(object):
             :param delay: the delay between write and read, in sec
             :return the data returned by the OBD-II Scanner
         """
-        if self.is_connected():
+        if self.is_port():
             self._write(data)
 
         # Wait for data to become available
@@ -214,17 +160,29 @@ class OBDScanner(object):
 
         return self.receive()
 
-    def supported_pids(self):
-        response = self.send(commands.CURRENT_MODE_PIDS_SUPPORTED_COMMAND)
-        return decode.decode_bitwise_pids(response.value)
-
     def vehicle_id_number(self):
         """
             Returns the vehicle's identification number (VIN)
             :return:
         """
-        self.send(commands.VEHICLE_ID_NUMBER_COMMAND)
-        return self.receive()
+        return self.send(commands.VEHICLE_ID_NUMBER_COMMAND)
+
+    def clear_trouble_codes(self):
+        """
+            Uses OBD Mode 04 to clear trouble codes and the malfunction
+            indicator lamp (MIL) / check engine light
+            :return:
+        """
+        if not self._check_response(self.send(commands.CLEAR_TROUBLE_CODES_COMMAND)):
+            # logging error
+            print("Clear trouble codes did not return success")
+
+    def echo_off(self):
+        """
+            Turns ECHO OFF for the OBD-II Scanner
+            :return response data
+        """
+        return self.send(elm327.ECHO_OFF_COMMAND).raw_value
 
     def _check_response(self, data):
         """

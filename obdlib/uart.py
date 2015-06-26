@@ -1,6 +1,6 @@
 PARITY_NONE = None
 DEFAULT_TIMEOUT = 1000
-DEFAULT_BAUDRATE = 9600
+DEFAULT_BAUDRATE = 38400
 DEFAULT_BYTESIZE = 8
 DEFAULT_STOPBITS = 1
 
@@ -26,7 +26,7 @@ class UART(object):
             self.bus = uart_base(port, baudrate, bytesize, parity, stopbits, timeout)
             self._mapping()
         except Exception as err:
-            print err
+            print(err)
             # logging exception
             return None
 

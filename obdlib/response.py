@@ -1,3 +1,6 @@
+import elm327
+
+
 class Response(object):
     """
         This object contains response data and
@@ -25,7 +28,7 @@ class Response(object):
                 # ! 4 characters if headers are disabled
                 #         [ value ]
                 # ex: 4100FFFFFFFF
-                value = r_value[4:]
+                value = r_value if r_value == elm327.NO_RESULT else r_value[4:]
             else:
                 # logging error
                 print("Dropped bytes! The frame size is not suitable.")

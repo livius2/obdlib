@@ -23,7 +23,7 @@ class UART(object):
     def connection(self, port, baudrate=DEFAULT_BAUDRATE, bytesize=DEFAULT_BYTESIZE, parity=PARITY_NONE,
                    stopbits=DEFAULT_STOPBITS, timeout=DEFAULT_TIMEOUT):
         try:
-            self.bus = uart_base(port, baudrate, bytesize, parity, stopbits, timeout)
+            self.bus = uart_base(port, baudrate)
             self._mapping()
         except Exception as err:
             print(err)

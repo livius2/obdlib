@@ -86,19 +86,22 @@ class OBDScanner(object):
             Initialize the OBD-II Scanner state after connecting
             :return:
         """
-        # self.reset()
+        self.reset()
         if not self._check_response(self.echo_off()):
             # logging error
-            print("ATE0 did not return success")
+            raise Exception("ATE0 did not return success")
         if not self._check_response(self.send(elm327.SET_PROTOCOL_AUTO_COMMAND).raw_value):
             # logging error
-            print("ATE0 did not return success")
+            raise Exception("Set protocol command did not return success")
 
-        self.obd_protocol = self.send(elm327.DESCRIBE_PROTOCOL_COMMAND).raw_value
+        self.obd_protocol = self.send(elm327.DESCRIBE_PROTOCOL_COMMAND).value
         self.sensor = sensors.Command(self.send, self.units)
 
         # checks connection with vehicle
         self.__connected = self.sensor.check_pids()
+
+        if not self.__connected:
+            raise Exception("Failed connection!")
 
     def receive(self):
         """
@@ -130,9 +133,9 @@ class OBDScanner(object):
                 return Response(value)
         else:
             # logging warning
-            print("Cannot read when unconnected")
+            raise Exception("Cannot read when unconnected")
 
-        return None
+        return Response()
 
     def reset(self):
         """
@@ -199,4 +202,4 @@ class OBDScanner(object):
         """
         self.uart_port.flushOutput()
         self.uart_port.flushInput()
-        self.uart_port.write(data + "\r\n")
+        self.uart_port.write(data + "\r")

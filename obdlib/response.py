@@ -1,4 +1,5 @@
 import elm327
+import re
 
 
 class Response(object):
@@ -8,32 +9,33 @@ class Response(object):
     """
     read_term = '\r\n'
 
-    def __init__(self, data):
+    def __init__(self, data=b''):
         # convert to string
         # split by term
         # remove spaces
-        buff = data.decode().split(self.read_term)
+        print(data)
+        buff = re.split('[{}]'.format(self.read_term), data.decode())
         self.raw_data = [line.strip().replace(' ', '') for line in buff if line]
+        print(self.raw_data)
 
     @property
     def value(self):
         """
             Retrieves useful value from data
         """
-        value = None
-        r_value = self.raw_data[0]
+        r_value = self.raw_data[0] if self.raw_data else None
         if r_value:
-            if len(r_value) >= 6 and len(r_value) <= 12:
+            if len(r_value) >= 4 and len(r_value) <= 16:
                 # remove first 4 characters. This are service bytes from ELM
                 # ! 4 characters if headers are disabled
                 #         [ value ]
                 # ex: 4100FFFFFFFF
-                value = r_value if r_value == elm327.NO_RESULT else r_value[4:]
+                r_value = r_value if r_value == elm327.NO_RESULT else r_value[4:]
             else:
                 # logging error
                 print("Dropped bytes! The frame size is not suitable.")
 
-        return value
+        return r_value
 
 
     @property

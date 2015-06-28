@@ -1,17 +1,10 @@
-PARITY_NONE = None
-DEFAULT_TIMEOUT = 1000
 DEFAULT_BAUDRATE = 38400
-DEFAULT_BYTESIZE = 8
-DEFAULT_STOPBITS = 1
 
 try:
     # if using pyBoard
     from pyb import UART as uart_base
 except:
     from serial import Serial as uart_base
-
-    PARITY_NONE = "N"
-    DEFAULT_TIMEOUT = 1
 
 
 class UART(object):
@@ -20,8 +13,7 @@ class UART(object):
         self.bus = None
         self.map = {}
 
-    def connection(self, port, baudrate=DEFAULT_BAUDRATE, bytesize=DEFAULT_BYTESIZE, parity=PARITY_NONE,
-                   stopbits=DEFAULT_STOPBITS, timeout=DEFAULT_TIMEOUT):
+    def connection(self, port, baudrate=DEFAULT_BAUDRATE):
         try:
             self.bus = uart_base(port, baudrate)
             self._mapping()

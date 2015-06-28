@@ -129,7 +129,7 @@ class Command(object):
         return self.mode + self.pid
 
     def _set_value(self, value):
-        if elm327.NO_RESULT == value:
+        if elm327.NO_RESULT == value or value is None:
             self.value = value
         else:
             self.value = self.__decoder(value, **self.kwargs) if self.kwargs else self.__decoder(value)
@@ -146,7 +146,7 @@ class Command(object):
             return args_wrapper
         except Exception as err:
             # logging error
-            print("Unsupported command.")
+            raise Exception("Unsupported command.")
 
     def __getattr__(self, item):
         try:
@@ -158,4 +158,4 @@ class Command(object):
             return self
         except Exception as err:
             # logging error
-            print("Unsupported command.")
+            raise Exception("Unsupported command.")

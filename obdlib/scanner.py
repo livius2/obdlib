@@ -30,9 +30,6 @@ class OBDScanner(object):
         self.elm_version = ""
         self.obd_protocol = ""
         self.units = units
-        # Time to wait (in seconds) before attempting to receive data after an
-        # OBD command has been issued
-        self.receive_wait_time = 0.5
         self.success = "OK"
         self.sensor = None
         # it does prove that the connection with a vehicle is working
@@ -86,13 +83,13 @@ class OBDScanner(object):
             Initialize the OBD-II Scanner state after connecting
             :return:
         """
-        self.reset()
+        # self.reset()
         if not self._check_response(self.echo_off()):
             # logging error
-            raise Exception("ATE0 did not return success")
+            raise Exception("Echo command did not completed")
         if not self._check_response(self.send(elm327.SET_PROTOCOL_AUTO_COMMAND).raw_value):
             # logging error
-            raise Exception("Set protocol command did not return success")
+            raise Exception("Set protocol command did not completed")
 
         self.obd_protocol = self.send(elm327.DESCRIBE_PROTOCOL_COMMAND).value
         self.sensor = sensors.Command(self.send, self.units)
@@ -101,7 +98,7 @@ class OBDScanner(object):
         self.__connected = self.sensor.check_pids()
 
         if not self.__connected:
-            raise Exception("Failed connection!")
+            raise Exception("Failed connection to the OBD2 interface!")
 
     def receive(self):
         """
@@ -143,23 +140,22 @@ class OBDScanner(object):
             :return:
         """
         if self.is_port():
-            self.send(elm327.RESET_COMMAND, 1)
-            self.elm_version = self.receive()
+            self.elm_version = self.send(elm327.RESET_COMMAND, 1)
 
-    def send(self, data, delay=None):
+    def send(self, data, wait=None):
         """
             Send data/command to the connected OBD-II Scanner
             :param data: the data/command to send to the connected OBD-II
             scanner
-            :param delay: the delay between write and read, in sec
+            :param wait: the delay between write and read, in sec
             :return the data returned by the OBD-II Scanner
         """
         if self.is_port():
             self._write(data)
 
         # Wait for data to become available
-        if delay:
-            time.sleep(delay)
+        if wait:
+            time.sleep(wait)
 
         return self.receive()
 
@@ -202,4 +198,4 @@ class OBDScanner(object):
         """
         self.uart_port.flushOutput()
         self.uart_port.flushInput()
-        self.uart_port.write(data + "\r")
+        self.uart_port.write(data + "\r\n")

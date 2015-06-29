@@ -72,14 +72,14 @@ class Command(object):
 
     def __getitem__(self, mode):
         try:
-            def args_wrapper(pid):
+            def get_pid(pid):
                 self.init(self.__modes.modes[mode][pid])
                 self._set_value(
                     self.__call(self.pid).value
                 )
                 return self
 
-            return args_wrapper
+            return get_pid
         except Exception as err:
             # logging error
             raise Exception("Unsupported command.")

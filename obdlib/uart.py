@@ -18,8 +18,8 @@ class UART(object):
             self.bus = uart_base(port, baudrate)
             self._mapping()
         except Exception as err:
-            print(err)
             # logging exception
+            print(err)
             return None
 
         return self

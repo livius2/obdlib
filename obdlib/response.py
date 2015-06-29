@@ -13,19 +13,18 @@ class Response(object):
         # convert to string
         # split by term
         # remove spaces
-        print(data)
         buff = re.split('[{}]'.format(self.read_term), data.decode())
         self.raw_data = [line.strip().replace(' ', '') for line in buff if line]
-        print(self.raw_data)
 
     @property
     def value(self):
         """
             Retrieves useful value from data
         """
+        # TODO: needs to analyze different responses (depends on protocol)
         r_value = self.raw_data[0] if self.raw_data else None
         if r_value:
-            if len(r_value) >= 4 and len(r_value) <= 16:
+            if len(r_value) >= 2 and len(r_value) <= 16:
                 # remove first 4 characters. This are service bytes from ELM
                 # ! 4 characters if headers are disabled
                 #         [ value ]

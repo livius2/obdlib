@@ -82,4 +82,4 @@ class Command(object):
             return get_pid
         except Exception as err:
             # logging error
-            raise Exception("Unsupported command.")
+            print("Unsupported command.")

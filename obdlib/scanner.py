@@ -87,11 +87,27 @@ class OBDScanner(object):
         if not self._check_response(self.echo_off()):
             # logging error
             raise Exception("Echo command did not completed")
+
+        if not self._check_response(self.send(elm327.SPACES_OFF_COMMAND).raw_value):
+            # logging error
+            print("Spaces off command did not completed")
+
+        if not self._check_response(self.send(elm327.LINEFEED_OFF_COMMAND).raw_value):
+            # logging error
+            print("Line feed off command did not completed")
+
+        # Disable memory function
+        self.send(elm327.MEMORY_OFF_COMMAND)
+
         if not self._check_response(self.send(elm327.SET_PROTOCOL_AUTO_COMMAND).raw_value):
             # logging error
             raise Exception("Set protocol command did not completed")
 
-        self.obd_protocol = self.send(elm327.DESCRIBE_PROTOCOL_COMMAND).value
+        if not self._check_response(self.send(elm327.HEADER_ON_COMMAND).raw_value):
+            # logging error
+            raise Exception("Enable header command did not completed")
+
+        self.obd_protocol = self.send(elm327.DESCRIBE_PROTOCOL_NUMBER_COMMAND).at_value
         self.sensor = sensors.Command(self.send, self.units)
 
         # checks connection with vehicle
@@ -99,6 +115,16 @@ class OBDScanner(object):
 
         if not self.__connected:
             raise Exception("Failed connection to the OBD2 interface!")
+
+    def get_proto_num(self):
+        """
+            Retrieves the protocol number (response format is - A4)
+        """
+        number = self.obd_protocol
+        if len(number) == 2 and 'A' in number:
+            number = int(number[-1], 16)
+
+        return number
 
     def receive(self):
         """
@@ -127,7 +153,7 @@ class OBDScanner(object):
                 value += data
 
             if value:
-                return Response(value)
+                return Response(value, self.get_proto_num())
         else:
             # logging warning
             raise Exception("Cannot read when unconnected")

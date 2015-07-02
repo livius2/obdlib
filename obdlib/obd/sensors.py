@@ -62,7 +62,7 @@ class Command(object):
             Checks available PIDs. If return data, it means connected True
             Prepares the ELM327 for communicating with vehicle - 01 pid 00
         """
-        pids = self[01](00)
+        pids = self[1](0) # 01 00
         if pids and isinstance(pids.__ecus, dict):
             self.__pids.update(pids.__ecus)
             # for ecu in self.__pids.keys():

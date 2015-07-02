@@ -65,7 +65,7 @@ class OBDScanner(object):
             Reads the vehicle's battery voltage from a connected OBD-II Scanner
             :return: the battery voltage returned by the OBD-II Scanner
         """
-        return self.send(elm327.BATTERY_VOLTAGE_COMMAND)
+        return self.send(elm327.BATTERY_VOLTAGE_COMMAND).at_value
 
     def disconnect(self):
         """
@@ -83,7 +83,7 @@ class OBDScanner(object):
             Initialize the OBD-II Scanner state after connecting
             :return:
         """
-        # self.reset()
+        self.reset()
         if not self._check_response(self.echo_off()):
             # logging error
             raise Exception("Echo command did not completed")
@@ -166,7 +166,7 @@ class OBDScanner(object):
             :return:
         """
         if self.is_port():
-            self.elm_version = self.send(elm327.RESET_COMMAND, 1)
+            self.elm_version = self.send(elm327.RESET_COMMAND, 1).at_value
 
     def send(self, data, wait=None):
         """
@@ -198,7 +198,7 @@ class OBDScanner(object):
             indicator lamp (MIL) / check engine light
             :return:
         """
-        if not self._check_response(self.send(commands.CLEAR_TROUBLE_CODES_COMMAND)):
+        if not self._check_response(self.send(commands.CLEAR_TROUBLE_CODES_COMMAND).raw_value):
             # logging error
             print("Clear trouble codes did not return success")
 

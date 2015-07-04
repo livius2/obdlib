@@ -42,15 +42,15 @@ class Command(object):
             Generates available ECU's value
             :return tuple (ecu, value)
         """
-        for ecu, value in self.__ecus.iteritems():
+        for ecu, value in self.__ecus.items():
             yield (ecu, value)
 
     def sensors(self, mode=1):
         """
             Generates available ECU's and PID's value
         """
-        for ecu, pids in self.__pids.iteritems():
-            for pid, access in pids.iteritems():
+        for ecu, pids in self.__pids.items():
+            for pid, access in pids.items():
                 pid = int(pid, 16)
                 if not access or pid in (0, 32, 64,):
                     continue
@@ -62,8 +62,8 @@ class Command(object):
             Checks available PIDs. If return data, it means connected True
             Prepares the ELM327 for communicating with vehicle - 01 pid 00
         """
-        pids = self[1](0) # 01 00
-        if pids and isinstance(pids.__ecus, dict):
+        pids = self[1](0)  # 01 00
+        if pids and isinstance(pids.__ecus, dict) and len(pids.__ecus):
             self.__pids.update(pids.__ecus)
             # for ecu in self.__pids.keys():
             #    if self.__pids[ecu][str(20)]:
@@ -77,7 +77,7 @@ class Command(object):
             Returns True, if some of the PID's are available
         """
         resp = False
-        for ecu, pids in self.__pids.iteritems():
+        for ecu, pids in self.__pids.items():
             if True in pids.values():
                 resp = True
                 break
@@ -87,7 +87,7 @@ class Command(object):
         """
             Converts (if needed) and sets current value of sensor
         """
-        if elm327.NO_RESULT != value or value is not None:
+        if elm327.NO_RESULT != value and value is not None:
             value = self.__decoder(value, **self.kwargs) if self.kwargs else self.__decoder(value)
 
         return value
@@ -97,7 +97,7 @@ class Command(object):
             def get_pid(pid):
                 self.init(self.__modes.modes[mode][pid])
                 self.__ecus.update(
-                    dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.iteritems())
+                    dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.items())
                 )
                 return self
 

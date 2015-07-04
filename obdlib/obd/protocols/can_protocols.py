@@ -57,7 +57,7 @@ class ProtocolsCan(Main):
                                 # 7E8 06 41 00 FF FF FF FF FC
                                 #
                                 # 29 bits header:
-                                # 18 DA F1 10 03 41 00 FF FF FF FF FC
+                                # 18 DA F1 10 06 41 00 FF FF FF FF FC
                                 count_byte = int(message[9], 16)
                                 data[ecu_number] = message[10:10 + count_byte * 2][4:]
 

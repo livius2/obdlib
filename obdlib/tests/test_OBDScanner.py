@@ -1,5 +1,5 @@
 import unittest
-import mock
+import unittest.mock as mock
 import scanner
 
 
@@ -59,12 +59,12 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(mock_reset.call_count, 0)
         self.assertEqual(self.scan.uart_port.close.call_count, 0)
 
-    #@mock.patch('sys.stdout')
+    @mock.patch('sys.stdout')
     @mock.patch('scanner.sensors.Command')
     @mock.patch('scanner.OBDScanner.send')
     @mock.patch('scanner.OBDScanner.echo_off')
     @mock.patch('scanner.OBDScanner.reset')
-    def test_initialize(self, mock_reset, mock_echo, mock_send, mock_sensor):
+    def test_initialize(self, mock_reset, mock_echo, mock_send, mock_sensor, mock_out):
         exception = ''
 
         def send(data):
@@ -74,6 +74,7 @@ class TestOBDScanner(unittest.TestCase):
 
             return r_v
 
+        # if connected, each request returns OK
         mock_echo.return_value = ['OK']
         r_value = ['OK']
         a_value = 'A5'
@@ -90,6 +91,7 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(mock_send.call_count, 6)
         self.assertEqual(mock_sensor.call_args_list[0][0], (mock_send, 0))
 
+        # if not connected
         mock_reset.reset_mock()
         mock_echo.reset_mock()
         mock_send.reset_mock()
@@ -102,7 +104,7 @@ class TestOBDScanner(unittest.TestCase):
             self.scan.initialize()
         self.assertEqual(cm.exception.__str__(), 'Failed connection to the OBD2 interface!')
 
-        # Exception
+        # Exception, check Echo
         mock_reset.reset_mock()
         mock_echo.reset_mock()
         mock_send.reset_mock()
@@ -117,20 +119,19 @@ class TestOBDScanner(unittest.TestCase):
             self.scan.initialize()
         self.assertEqual(cm.exception.__str__(), 'Echo command did not completed')
 
-        #for item in range(4):
-        #    mock_reset.reset_mock()
-        #    mock_echo.reset_mock()
-        #    mock_send.reset_mock()
-        #    mock_sensor.reset_mock()
+        mock_reset.reset_mock()
+        mock_echo.reset_mock()
+        mock_send.reset_mock()
+        mock_sensor.reset_mock()
 
-        #    mock_echo.return_value = ['OK']
-        #    a_value = 'A5'
-        #    send.counter = item
-        #    mock_send.side_effect = send
+        mock_echo.return_value = ['OK']
+        r_value = ['']
+        a_value = 'A5'
+        mock_send.side_effect = send
 
-        #    with self.assertRaises(Exception) as cm:
-        #        self.scan.initialize()
-        #    self.assertEqual(cm.exception.__str__(), 'Set protocol command did not completed')
+        with self.assertRaises(Exception) as cm:
+            self.scan.initialize()
+        self.assertEqual(cm.exception.__str__(), "Set protocol command did not completed")
 
     def test_get_proto_num(self):
         self.scan.obd_protocol = 'AA'

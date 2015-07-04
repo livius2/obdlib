@@ -1,7 +1,7 @@
 from utils import *
 
 # OBD Modes (described in OBD-II standard SAE J1979)
-CURRENT_DATA = 01
+CURRENT_DATA = 1
 FREEZE_FRAME_DATA = "02"
 REQUEST_TROUBLE_CODES = "03"
 CLEAR_TROUBLE_CODES_AND_VALUES = "04"
@@ -89,8 +89,32 @@ class Modes(object):
                 (),
                 (),
                 (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
 
                 ("PIDS_C", "PIDs supported [40 - 60]", "0140", 4, "", bitwise_pids, {"start": 64}),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
+                (),
                 (),
                 (),
                 (),

@@ -1,5 +1,5 @@
 import elm327
-from modes import Modes
+from obd.modes import Modes
 
 
 class Command(object):
@@ -24,62 +24,84 @@ class Command(object):
         self.value = None
         self.unit = None
         self.kwargs = None
-        self.__sensors = {}
         # list of pids (available or not)
         self.__pids = {}
+        self.__ecus = {}
 
     def init(self, args):
+        """
+            Unpacks modes params
+            :param args - mode params
+        """
         self.title, self.description, self.pid, \
         self.bytes, self.unit, self.__decoder, self.kwargs = args
 
-    def sensors(self, mode):
-        for pid, access in self.__pids.iteritems():
-            pid = int(pid, 16)
-            if not access or pid in (0, 32, 64,):
-                continue
-            self[mode](pid)
-            yield self
+    @property
+    def ecus(self):
+        """
+            Generates available ECU's value
+            :return tuple (ecu, value)
+        """
+        for ecu, value in self.__ecus.iteritems():
+            yield (ecu, value)
+
+    def sensors(self, mode=1):
+        """
+            Generates available ECU's and PID's value
+        """
+        for ecu, pids in self.__pids.iteritems():
+            for pid, access in pids.iteritems():
+                pid = int(pid, 16)
+                if not access or pid in (0, 32, 64,):
+                    continue
+                self[mode](pid)
+                yield self
 
     def check_pids(self):
         """
             Checks available PIDs. If return data, it means connected True
             Prepares the ELM327 for communicating with vehicle - 01 pid 00
         """
-        pids = self[01](00)
-        if pids:
-            if isinstance(pids.value, dict):
-                self.__pids.update(pids.value)
-                # if self.__pids[20]:
-                # self.__pids.update(self[01](20).value)
-                # if self.__pids[40]:
-                # self.__pids.update(self[01](40).value)
-                return True
+        pids = self[1](0) # 01 00
+        if pids and isinstance(pids.__ecus, dict):
+            self.__pids.update(pids.__ecus)
+            # for ecu in self.__pids.keys():
+            #    if self.__pids[ecu][str(20)]:
+            #        self.__pids[ecu].update(self[01](int('20', 16)).__ecus[ecu])
+            #        if self.__pids[ecu][str(40)]:
+            #            self.__pids[ecu].update(self[01](int('40', 16)).__ecus[ecu])
+            return True
 
     def is_pids(self):
         """
             Returns True, if some of the PID's are available
         """
-        return True in self.__pids.values()
+        resp = False
+        for ecu, pids in self.__pids.iteritems():
+            if True in pids.values():
+                resp = True
+                break
+        return resp
 
     def _set_value(self, value):
         """
             Converts (if needed) and sets current value of sensor
         """
-        if elm327.NO_RESULT == value or value is None:
-            self.value = value
-        else:
-            self.value = self.__decoder(value, **self.kwargs) if self.kwargs else self.__decoder(value)
+        if elm327.NO_RESULT != value or value is not None:
+            value = self.__decoder(value, **self.kwargs) if self.kwargs else self.__decoder(value)
+
+        return value
 
     def __getitem__(self, mode):
         try:
             def get_pid(pid):
                 self.init(self.__modes.modes[mode][pid])
-                self._set_value(
-                    self.__call(self.pid).value
+                self.__ecus.update(
+                    dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.iteritems())
                 )
                 return self
 
             return get_pid
         except Exception as err:
             # logging error
-            raise Exception("Unsupported command.")
+            print("Unsupported command.")

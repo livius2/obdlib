@@ -101,6 +101,7 @@ SECONDARY_AIR_STATUS = {
 
 # Mode 01 PID 1C returns a single byte of data which describes which OBD standards.
 OBD_STANDARDS = (
+    None,
     'OBD-II as defined by the CARB',
     'OBD as defined by the EPA',
     'OBD and OBD-II',

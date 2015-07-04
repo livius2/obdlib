@@ -1,6 +1,5 @@
 from obd.pids import *
 
-
 unit_english = 0
 
 
@@ -71,7 +70,7 @@ def term_fuel(value):
         Converts the vehicle's short term fuel or long term fuel
         :return: the current engine value
     """
-    return (__digit(value) - 128) * 100 / 128
+    return round((__digit(value) - 128) * 100 / 128, 2)
 
 
 def fuel_pressure(value):
@@ -84,7 +83,7 @@ def fuel_pressure(value):
     if unit_english:
         # kPa - > psi conversion
         value = value * 0.145037738
-    return value
+    return round(value, 2)
 
 
 def absolute_pressure(value):
@@ -97,7 +96,7 @@ def absolute_pressure(value):
     if unit_english:
         # kPa - > psi conversion
         value = value * 0.145037738
-    return value
+    return round(value, 2)
 
 
 def timing_advance(value):
@@ -163,7 +162,7 @@ def obd_standards(value):
         Converts the vehicle's OBD standards this vehicle conforms to
         :return: the current engine value
     """
-    return OBD_STANDARDS[__digit(value)] if len(OBD_STANDARDS) >= value else None
+    return OBD_STANDARDS[__digit(value)] if len(OBD_STANDARDS) >= __digit(value) else None
 
 
 def time(value):
@@ -204,7 +203,10 @@ def fuel_type(value):
         Converts the vehicle's fuel type
         :return: a description of the type of fuel used by the vehicle
     """
-    return FUEL_TYPE_DESCRIPTION.get(__digit(value), None)
+    try:
+        return FUEL_TYPE_DESCRIPTION[__digit(value)]
+    except IndexError:
+        return None
 
 
 def __digit(value):

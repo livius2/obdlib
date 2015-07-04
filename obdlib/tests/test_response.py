@@ -1,5 +1,5 @@
 import unittest
-import mock
+import unittest.mock as mock
 import response
 
 
@@ -48,7 +48,7 @@ class TestResponse(unittest.TestCase):
 
     @unittest.skip("_check_value")
     def test__check_value(self):
-        self.fail()
+        pass
 
     def test_value(self):
         expected_data = {'E8': 'FFFFFFFF'}
@@ -82,6 +82,7 @@ class TestResponse(unittest.TestCase):
         car_response = b'A4\r\n'
         resp = response.Response(car_response, 4)
         self.assertEqual(resp.at_value, expected_data)
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestResponse)
 unittest.TextTestRunner(verbosity=2).run(suite)

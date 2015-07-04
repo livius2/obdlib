@@ -23,6 +23,7 @@ class Response(object):
         """
 
         def wrapper(self):
+
             if '?' in self.raw_data[:1]:
                 return None
             else:

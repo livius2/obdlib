@@ -43,7 +43,7 @@ class Main(object):
         """
             Checks the data. Return False, if the data equal 'NO DATA'
         """
-        return False if data == NO_RESULT else True
+        return False if NO_RESULT in data else True
 
     @classmethod
     def check_error(cls, data):

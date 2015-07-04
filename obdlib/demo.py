@@ -8,7 +8,7 @@ with scanner.OBDScanner("/dev/pts/5") as scan:
         if scan.sensor:
             if scan.sensor.is_pids():
                 # Engine coolant temperature
-                sensor = scan.sensor[01](05)
+                sensor = scan.sensor[1](5)
                 # two or more ECU's respond to one request
                 # we should be prepared for it
                 for ecu, value in sensor.ecus:

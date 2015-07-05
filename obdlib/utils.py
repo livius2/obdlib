@@ -1,4 +1,4 @@
-from .obd.pids import *
+from obd.pids import *
 from binascii import unhexlify
 
 unit_english = 0

@@ -1,7 +1,7 @@
 from elm327 import NO_RESULT
 
 
-class Main(object):
+class Base(object):
     def __init__(self):
         # see ELM spec. p. 25
         self.protocols = {

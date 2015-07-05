@@ -91,6 +91,15 @@ FUEL_TYPE_DESCRIPTION = (
     'Bifuel running diesel'
 )
 
+FUEL_SYSTEM_STATUS_DESC = {
+    0: 'No fuel system available',
+    1: 'Open loop due to insufficient engine temperature',
+    2: 'Closed loop, using oxygen sensor feedback to determine fuel mix',
+    4: 'Open loop due to engine load OR fuel cut to deceleration',
+    8: 'Open loop due to system failure',
+    16: 'Closed loop, using at least one oxygen sensor but there is a fault in the feedback system'
+}
+
 # Mode 01 PID 12 returns a single byte of data which describes the secondary air status.
 SECONDARY_AIR_STATUS = {
     1: 'Upstream',

@@ -1,7 +1,7 @@
-from obd.protocols.main import Main
+from obd.protocols.base import Base
 
 
-class ProtocolsCan(Main):
+class ProtocolsCan(Base):
     """
         Supports the CAN protocol (from 6 ...)
     """
@@ -11,7 +11,7 @@ class ProtocolsCan(Main):
             :param number - the number of protocol
             :param head - flag for init header
         """
-        Main.__init__(self)
+        Base.__init__(self)
         self.header = head
         self.add_bits = '00000'
         # message types, see ELM spec. page 44
@@ -38,6 +38,7 @@ class ProtocolsCan(Main):
                 # if the header enabled
                 if self.header:
                     # multi line (ELM spec page 42) or single frame response
+                    # TODO: needs to check if get trouble codes (DTCs), mode 3
                     if len(ecu_messages):
                         # sorts ECU's messages
                         ecu_messages = sorted(ecu_messages)

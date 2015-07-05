@@ -38,7 +38,6 @@ class ProtocolsCan(Base):
                 # if the header enabled
                 if self.header:
                     # multi line (ELM spec page 42) or single frame response
-                    # TODO: needs to check if get trouble codes (DTCs), mode 3
                     if len(ecu_messages):
                         # sorts ECU's messages
                         ecu_messages = sorted(ecu_messages)
@@ -50,10 +49,17 @@ class ProtocolsCan(Base):
 
                         for message in ecu_messages:
                             ecu_number = message[6:8]
-                            type = int(message[8], 16)
+                            f_type = int(message[8], 16)
+                            response_mode = int(message[10:12])
+
+                            # check if response trouble codes
+                            if response_mode == 43:
+                                # add fake byte after the mode one
+                                # nothing to do
+                                pass
 
                             # Single Frame
-                            if type == self.mess_SF:
+                            if f_type == self.mess_SF:
                                 # 11 bits header:
                                 # 7E8 06 41 00 FF FF FF FF FC
                                 #
@@ -76,11 +82,11 @@ class ProtocolsCan(Base):
                             # 18 DA F1 10    1      0   32 38 39 34 39 41 43
                             # 18 DA F1 10 21 32 38 39 34 39 41 43
                             # 18 DA F1 10 22 00 00 00 00 00 00 31
-                            elif type == self.mess_FF:
+                            elif f_type == self.mess_FF:
                                 data[ecu_number] = message[10:]
 
                             # the Consecutive Frame
-                            elif type == self.mess_CF:
+                            elif f_type == self.mess_CF:
                                 data[ecu_number] += message[10:]
                     else:
                         # logging error

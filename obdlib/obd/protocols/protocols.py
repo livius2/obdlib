@@ -30,7 +30,13 @@ class Protocols(Base):
                             ecu_number = message[4:6]
                             # if one ECU returns multi line
                             # multi line includes line number byte
-                            # TODO: needs to check if get trouble codes (DTCs), mode 3
+                            response_mode = int(message[6:8])
+
+                            # check if response trouble codes
+                            if response_mode == 43:
+                                # add fake byte after the mode one
+                                message = message[:8] + '00' + message[8:]
+
                             if service_data[ecu_number] > 1:
                                 # multi line response - ELM spec page 42
                                 # response format priority:receiver:transmitter:mode:pid:line_number:data:checksum

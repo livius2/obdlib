@@ -328,9 +328,20 @@ def dtc_statuses(value):
 def trouble_codes(value):
     """
         Checks the vehicle's trouble codes
-        :return None | dict, {code: description}
+        :return list of codes
     """
-    return None
+    codes = []
+    # trouble data frame include 6 bytes - 3 trouble codes
+    # ex: 0133 0000 0000
+    for item in range(0, 12, 4):
+        # get trouble code
+        code = value[item:item + 4]
+        # check first byte
+        first_char = DTCs_table.get(code[0])
+        if first_char and __digit(code):
+            codes.append(first_char + code[1:])
+
+    return codes
 
 
 def __digit(value):

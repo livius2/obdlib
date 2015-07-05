@@ -142,6 +142,10 @@ class TestUtils(unittest.TestCase):
         statuses = utils.dtc_statuses('81076504')
         self.assertEqual(statuses, expected)
 
+    def test_trouble_codes(self):
+        dtc_s = utils.trouble_codes('0133D0161131')
+        self.assertEqual(dtc_s, ['P0133', 'U1016', 'P1131'])
+
     def test_bitwise_pids(self):
         """
             Verify we correctly parse information about supported PIDs on a 1999

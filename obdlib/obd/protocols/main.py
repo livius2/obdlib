@@ -1,4 +1,4 @@
-from elm327 import NO_RESULT
+from obdlib.elm327 import NO_RESULT
 
 
 class Main(object):

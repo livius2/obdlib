@@ -1,14 +1,20 @@
 import unittest
-import mock
-import response
+
+import sys
+if sys.version_info[0] < 3:
+    import mock
+else:
+    import unittest.mock as mock
+
+import obdlib.response as response
 
 
 class TestResponse(unittest.TestCase):
     def setUp(self):
         pass
 
-    @mock.patch('obd.protocols.protocols.Protocols')
-    @mock.patch('obd.protocols.can_protocols.ProtocolsCan')
+    @mock.patch('obdlib.obd.protocols.protocols.Protocols')
+    @mock.patch('obdlib.obd.protocols.can_protocols.ProtocolsCan')
     def test___init__(self, mock_can_proto, mock_proto):
         # Old protocols
         expected_raw_data = []
@@ -83,5 +89,6 @@ class TestResponse(unittest.TestCase):
         resp = response.Response(car_response, 4)
         self.assertEqual(resp.at_value, expected_data)
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestResponse)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestResponse)
+    unittest.TextTestRunner(verbosity=2).run(suite)

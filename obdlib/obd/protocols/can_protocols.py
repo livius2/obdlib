@@ -1,4 +1,4 @@
-from obd.protocols.main import Main
+from obdlib.obd.protocols.main import Main
 
 
 class ProtocolsCan(Main):

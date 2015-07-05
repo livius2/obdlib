@@ -1,4 +1,4 @@
-from obd.protocols import protocols, can_protocols
+from obdlib.obd.protocols import protocols, can_protocols
 
 
 class Response(object):

@@ -1,4 +1,4 @@
-from utils import *
+from obdlib.utils import *
 
 # OBD Modes (described in OBD-II standard SAE J1979)
 CURRENT_DATA = 1

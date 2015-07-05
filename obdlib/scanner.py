@@ -1,9 +1,9 @@
 import time
-import uart
-import elm327
-from obd import commands
-from obd import sensors
-from response import Response
+import obdlib.uart as uart
+import obdlib.elm327 as elm327
+from obdlib.obd import commands
+from obdlib.obd import sensors
+from obdlib.response import Response
 
 
 class OBDScanner(object):

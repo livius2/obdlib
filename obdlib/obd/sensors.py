@@ -1,5 +1,5 @@
-import elm327
-from obd.modes import Modes
+import obdlib.elm327 as elm327
+from obdlib.obd.modes import Modes
 
 
 class Command(object):

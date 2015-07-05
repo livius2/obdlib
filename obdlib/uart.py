@@ -1,9 +1,10 @@
 DEFAULT_BAUDRATE = 38400
-
-try:
+import sys
+if (hasattr(sys, 'implementation') and
+    sys.implementation.name == 'micropython'):
     # if using pyBoard
     from pyb import UART as uart_base
-except:
+else:
     from serial import Serial as uart_base
 
 

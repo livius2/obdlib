@@ -1,4 +1,4 @@
-from obd.pids import *
+from obdlib.obd.pids import *
 
 
 unit_english = 0

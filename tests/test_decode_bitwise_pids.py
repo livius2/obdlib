@@ -1,16 +1,16 @@
 from unittest import TestCase
-from obdlib.scanner import decode_bitwise_pids
+from obdlib.utils import bitwise_pids
 
-DURANGO_SUPPORTED_PIDS_RESPONSE = 'BE 3E B8 10 '
-JETTA_DIESEL_SUPPORTED_PIDS_RESPONSE = '98 3B 80 19 '
+DURANGO_SUPPORTED_PIDS_RESPONSE = 'BE3EB810 '
+JETTA_DIESEL_SUPPORTED_PIDS_RESPONSE = '983B8019 '
 
 class TestDecodeBitwisePids(TestCase):
-    def test_decode_bitwise_pids_durango():
+    def test_decode_bitwise_pids_durango(self):
         """
             Verify we correctly parse information about supported PIDs on a 1999
             Dodge Durango
         """
-        supported_pids = decode_bitwise_pids(DURANGO_SUPPORTED_PIDS_RESPONSE)
+        supported_pids = bitwise_pids(DURANGO_SUPPORTED_PIDS_RESPONSE)
         assert supported_pids == {
             '01': True,
             '02': False,
@@ -47,12 +47,12 @@ class TestDecodeBitwisePids(TestCase):
         }
 
 
-    def test_decode_bitwise_pids_jetta_diesel():
+    def test_decode_bitwise_pids_jetta_diesel(self):
         """
             Verify we correctly parse information about supported PIDs on a 2004
             Jetta Diesel Wagon
         """
-        supported_pids = decode_bitwise_pids(JETTA_DIESEL_SUPPORTED_PIDS_RESPONSE)
+        supported_pids = bitwise_pids(JETTA_DIESEL_SUPPORTED_PIDS_RESPONSE)
         assert supported_pids == {
             '01': True,
             '02': False,

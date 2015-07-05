@@ -312,6 +312,6 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(self.scan.uart_port.write.call_count, 1)
         self.assertEqual(self.scan.uart_port.write.call_args_list[0][0], ('ATH1\r\n',))
 
-
-suite = unittest.TestLoader().loadTestsFromTestCase(TestOBDScanner)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestOBDScanner)
+    unittest.TextTestRunner(verbosity=2).run(suite)

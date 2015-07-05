@@ -94,7 +94,7 @@ class Command(object):
 
     def __getitem__(self, mode):
         try:
-            def get_pid(pid):
+            def get_pid(pid=0):
                 self.init(self.__modes.modes[mode][pid])
                 self.__ecus.update(
                     dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.items())

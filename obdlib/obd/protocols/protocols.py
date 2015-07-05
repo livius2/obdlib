@@ -1,13 +1,13 @@
-from obd.protocols.main import Main
+from obd.protocols.base import Base
 
 
-class Protocols(Main):
+class Protocols(Base):
     """
         Supports next protocols - PWM, VPW, KWP (from 0 to 5)
     """
 
     def __init__(self, head=True):
-        Main.__init__(self)
+        Base.__init__(self)
         self.header = head
 
     def create_data(self, raw_data):
@@ -30,6 +30,7 @@ class Protocols(Main):
                             ecu_number = message[4:6]
                             # if one ECU returns multi line
                             # multi line includes line number byte
+                            # TODO: needs to check if get trouble codes (DTCs), mode 3
                             if service_data[ecu_number] > 1:
                                 # multi line response - ELM spec page 42
                                 # response format priority:receiver:transmitter:mode:pid:line_number:data:checksum

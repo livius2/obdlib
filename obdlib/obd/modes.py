@@ -2,8 +2,8 @@ from utils import *
 
 # OBD Modes (described in OBD-II standard SAE J1979)
 CURRENT_DATA = 1
-FREEZE_FRAME_DATA = "02"
-REQUEST_TROUBLE_CODES = "03"
+FREEZE_FRAME_DATA = 2
+REQUEST_TROUBLE_CODES = 3
 CLEAR_TROUBLE_CODES_AND_VALUES = "04"
 OXYGEN_SENSOR_DATA = "05"
 SYSTEM_MONITORING_DATA = "06"
@@ -34,12 +34,12 @@ class Modes(object):
                     "0100",  # command
                     4,  # Data bytes returned
                     "",  # Units
-                    bitwise_pids,  # Callback
+                    bitwise_pids,  # Callback decoder
                     {"start": 0}  # Additional params, must be dict
                 ),
-                ("DTC_STATUS", "Monitor status since DTCs cleared", "0101", 4, "", lambda v: v, None),
+                ("DTC_STATUS", "Monitor status since DTCs cleared", "0101", 4, "", dtc_statuses, None),
                 ("FREEZE", "Freeze DTC", "0102", 2, "", lambda v: v, None),
-                ("FUEL_ST", "Fuel system status", "0103", 2, "", lambda v: v, None),
+                ("FUEL_ST", "Fuel system status", "0103", 2, "", fuel_system_status, None),
                 ("ENGINE_LV", "Calculated engine load value", "0104", 1, "%", load_value, None),
                 ("COOLANT_TEMP", "Engine coolant temperature", "0105", 1, "C", coolant_temp, None),
                 ("STF1", "Short term fuel % trim_Bank 1", "0106", 1, "%", term_fuel, None),
@@ -55,7 +55,7 @@ class Modes(object):
                 ("MAF", "MAF air flow rate", "0110", 2, "grams/sec", air_flow_rate, None),
                 ("TP", "Throttle position", "0111", 1, "%", throttle_pos, None),
                 ("AIR_ST", "Commanded secondary air status", "0112", 1, "", air_status, None),
-                ("OS_A", "Oxygen sensors present", "0113", 1, "", lambda v: v, None),
+                ("OS_A", "Oxygen sensors present", "0113", 1, "", oxygen_sensors, None),
                 ("OS11", "Bank 1, Sensor 1 - voltage", "0114", 2, "Volts", voltage, None),
                 ("OS12", "Bank 1, Sensor 2 - voltage", "0115", 2, "Volts", voltage, None),
                 ("OS13", "Bank 1, Sensor 3 - voltage", "0116", 2, "Volts", voltage, None),
@@ -65,8 +65,8 @@ class Modes(object):
                 ("OS23", "Bank 2, Sensor 3 - voltage", "011A", 2, "Volts", voltage, None),
                 ("OS24", "Bank 2, Sensor 4 - voltage", "011B", 2, "Volts", voltage, None),
                 ("OBD", "OBD standards this vehicle conforms to", "011C", 1, "", obd_standards, None),
-                ("OS_B", "Oxygen sensors present", "011D", 1, "", lambda v: v, None),
-                ("AIS", "Auxiliary input status", "011E", 1, "", lambda v: v, None),
+                ("OS_B", "Oxygen sensors present", "011D", 1, "", oxygen_sensors, None),
+                ("AIS", "Auxiliary input status", "011E", 1, "", aux_input_status, None),
                 ("ENGINE_TIME", "Run time since engine start", "011F", 2, "seconds", time, None),
 
                 ("PIDS_20-40", "PIDs supported [20 - 40]", "0120", 4, "", bitwise_pids, {"start": 32}),
@@ -134,5 +134,8 @@ class Modes(object):
                 (),
                 (),
                 (),
+            ),
+            REQUEST_TROUBLE_CODES: (
+                ("DTCs", "Request trouble codes", "03", "n*6", "", trouble_codes, None),
             )
         }

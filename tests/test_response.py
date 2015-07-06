@@ -1,14 +1,19 @@
 import unittest
-import unittest.mock as mock
-import response
+import sys
+
+if sys.version_info[0] < 3:
+    import mock
+else:
+    import unittest.mock as mock
+import obdlib.response as response
 
 
 class TestResponse(unittest.TestCase):
     def setUp(self):
         pass
 
-    @mock.patch('obd.protocols.protocols.Protocols')
-    @mock.patch('obd.protocols.can_protocols.ProtocolsCan')
+    @mock.patch('obdlib.obd.protocols.protocols.Protocols')
+    @mock.patch('obdlib.obd.protocols.can_protocols.ProtocolsCan')
     def test___init__(self, mock_can_proto, mock_proto):
         # Old protocols
         expected_raw_data = []

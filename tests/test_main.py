@@ -1,6 +1,11 @@
 import unittest
-import unittest.mock as mock
-from obd.protocols.base import Base
+import sys
+
+if sys.version_info[0] < 3:
+    import mock
+else:
+    import unittest.mock as mock
+from obdlib.obd.protocols.base import Base
 
 
 class TestMain(unittest.TestCase):

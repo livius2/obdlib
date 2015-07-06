@@ -1,8 +1,9 @@
-import elm327
-from obd.modes import Modes
+from obdlib.elm327 import NO_RESULT
+from obdlib.obd.modes import Modes
 
 
 class Command(object):
+
     """
         This class to provide the common functionality
         to make PID's request
@@ -34,7 +35,7 @@ class Command(object):
             :param args - mode params
         """
         self.title, self.description, self.pid, \
-        self.bytes, self.unit, self.__decoder, self.kwargs = args
+            self.bytes, self.unit, self.__decoder, self.kwargs = args
 
     @property
     def ecus(self):
@@ -66,10 +67,10 @@ class Command(object):
         if pids and isinstance(pids.__ecus, dict) and len(pids.__ecus):
             self.__pids.update(pids.__ecus)
             # for ecu in self.__pids.keys():
-            #    if self.__pids[ecu][str(20)]:
+            # if self.__pids[ecu][str(20)]:
             #        self.__pids[ecu].update(self[01](int('20', 16)).__ecus[ecu])
             #        if self.__pids[ecu][str(40)]:
-            #            self.__pids[ecu].update(self[01](int('40', 16)).__ecus[ecu])
+            # self.__pids[ecu].update(self[01](int('40', 16)).__ecus[ecu])
             return True
 
     def is_pids(self):
@@ -87,8 +88,10 @@ class Command(object):
         """
             Converts (if needed) and sets current value of sensor
         """
-        if elm327.NO_RESULT != value and value is not None:
-            value = self.__decoder(value, **self.kwargs) if self.kwargs else self.__decoder(value)
+        if NO_RESULT != value and value is not None:
+            value = self.__decoder(
+                value,
+                **self.kwargs) if self.kwargs else self.__decoder(value)
 
         return value
 

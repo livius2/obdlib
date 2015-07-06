@@ -1,6 +1,11 @@
 import unittest
-import unittest.mock as mock
-import obd.protocols.can_protocols as p_can
+import sys
+
+if sys.version_info[0] < 3:
+    import mock
+else:
+    import unittest.mock as mock
+import obdlib.obd.protocols.can_protocols as p_can
 
 
 class TestProtocolsCan(unittest.TestCase):

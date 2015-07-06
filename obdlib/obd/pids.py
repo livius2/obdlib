@@ -100,7 +100,8 @@ FUEL_SYSTEM_STATUS_DESC = {
     16: 'Closed loop, using at least one oxygen sensor but there is a fault in the feedback system'
 }
 
-# Mode 01 PID 12 returns a single byte of data which describes the secondary air status.
+# Mode 01 PID 12 returns a single byte of data which describes the
+# secondary air status.
 SECONDARY_AIR_STATUS = {
     1: 'Upstream',
     2: 'Downstream of catalytic converter',
@@ -108,7 +109,8 @@ SECONDARY_AIR_STATUS = {
     8: 'Pump commanded on for diagnostics',
 }
 
-# Mode 01 PID 1C returns a single byte of data which describes which OBD standards.
+# Mode 01 PID 1C returns a single byte of data which describes which OBD
+# standards.
 OBD_STANDARDS = (
     None,
     'OBD-II as defined by the CARB',

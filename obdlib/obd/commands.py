@@ -1,5 +1,5 @@
-from obd import modes
-from obd import pids
+from obdlib.obd import modes
+from obdlib.obd import pids
 
 VEHICLE_ID_NUMBER_COMMAND = '{0} {1}'.format(
     modes.VEHICLE_INFORMATION_DATA, pids.VEHICLE_IDENTIFICATION_NUMBER)

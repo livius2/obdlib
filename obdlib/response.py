@@ -1,7 +1,8 @@
-from obd.protocols import protocols, can_protocols
+from obdlib.obd.protocols import protocols, can_protocols
 
 
 class Response(object):
+
     """
         This object contains response data and
         includes the common data analyzing
@@ -12,9 +13,11 @@ class Response(object):
         # split by term
         # remove spaces
         buff = data.decode().replace('\n', '').split('\r')
-        self.raw_data = [line.strip().replace(' ', '') for line in buff if line]
+        self.raw_data = [line.strip().replace(' ', '')
+                         for line in buff if line]
         # init protocol (CAN or rest)
-        self.protocol = can_protocols.ProtocolsCan(proto_num) if proto_num > 5 else protocols.Protocols()
+        self.protocol = can_protocols.ProtocolsCan(
+            proto_num) if proto_num > 5 else protocols.Protocols()
 
     def _check_value(func):
         """

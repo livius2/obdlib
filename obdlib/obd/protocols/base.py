@@ -1,7 +1,8 @@
-from elm327 import NO_RESULT
+from obdlib.elm327 import NO_RESULT
 
 
-class Main(object):
+class Base(object):
+
     def __init__(self):
         # see ELM spec. p. 25
         self.protocols = {
@@ -43,7 +44,7 @@ class Main(object):
         """
             Checks the data. Return False, if the data equal 'NO DATA'
         """
-        return False if data == NO_RESULT else True
+        return False if NO_RESULT in data else True
 
     @classmethod
     def check_error(cls, data):
@@ -64,7 +65,7 @@ class Main(object):
             # logging error
             print('Error: mode {} - {}'.format(data[0][2:4],  # mode
                                                codes.get(int(data[0][-2:])))  # code
-            )
+                  )
             response = False
 
         return response

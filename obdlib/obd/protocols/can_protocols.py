@@ -1,7 +1,8 @@
-from obd.protocols.main import Main
+from obdlib.obd.protocols.base import Base
 
 
-class ProtocolsCan(Main):
+class ProtocolsCan(Base):
+
     """
         Supports the CAN protocol (from 6 ...)
     """
@@ -11,7 +12,7 @@ class ProtocolsCan(Main):
             :param number - the number of protocol
             :param head - flag for init header
         """
-        Main.__init__(self)
+        Base.__init__(self)
         self.header = head
         self.add_bits = '00000'
         # message types, see ELM spec. page 44
@@ -34,32 +35,44 @@ class ProtocolsCan(Main):
         if raw_data:
             ecu_messages = self.remove_searching(raw_data)
 
-            if self.check_result(ecu_messages) and self.check_error(ecu_messages):
+            if self.check_result(
+                    ecu_messages) and self.check_error(ecu_messages):
                 # if the header enabled
                 if self.header:
                     # multi line (ELM spec page 42) or single frame response
                     if len(ecu_messages):
+                        data_start_byte = 4
                         # sorts ECU's messages
                         ecu_messages = sorted(ecu_messages)
 
                         if self.header_bits == self.header_11:
                             # align CAN header (11 bits, 29 bits)
                             # PCI byte are 8 and 9 indexes
-                            ecu_messages = [self.add_bits + mess for mess in ecu_messages]
+                            ecu_messages = [
+                                self.add_bits +
+                                mess for mess in ecu_messages]
 
                         for message in ecu_messages:
                             ecu_number = message[6:8]
-                            type = int(message[8], 16)
+                            f_type = int(message[8], 16)
+                            response_mode = int(message[10:12])
+
+                            # check if response trouble codes
+                            if response_mode == 43:
+                                # add fake byte after the mode one
+                                # nothing to do
+                                data_start_byte = 2
 
                             # Single Frame
-                            if type == self.mess_SF:
+                            if f_type == self.mess_SF:
                                 # 11 bits header:
                                 # 7E8 06 41 00 FF FF FF FF FC
                                 #
                                 # 29 bits header:
-                                # 18 DA F1 10 03 41 00 FF FF FF FF FC
+                                # 18 DA F1 10 06 41 00 FF FF FF FF FC
                                 count_byte = int(message[9], 16)
-                                data[ecu_number] = message[10:10 + count_byte * 2][4:]
+                                data[ecu_number] = message[
+                                    10:10 + count_byte * 2][data_start_byte:]
 
                             # multi line frame
                             # the First Frame (of a multi frame message)
@@ -75,11 +88,11 @@ class ProtocolsCan(Main):
                             # 18 DA F1 10    1      0   32 38 39 34 39 41 43
                             # 18 DA F1 10 21 32 38 39 34 39 41 43
                             # 18 DA F1 10 22 00 00 00 00 00 00 31
-                            elif type == self.mess_FF:
+                            elif f_type == self.mess_FF:
                                 data[ecu_number] = message[10:]
 
                             # the Consecutive Frame
-                            elif type == self.mess_CF:
+                            elif f_type == self.mess_CF:
                                 data[ecu_number] += message[10:]
                     else:
                         # logging error

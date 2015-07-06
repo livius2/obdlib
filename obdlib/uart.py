@@ -8,6 +8,7 @@ except:
 
 
 class UART(object):
+
     def __init__(self):
         self.bus_name = uart_base.__name__
         self.bus = None
@@ -39,7 +40,8 @@ class UART(object):
             item = self.map[self.bus_name][method]
             return getattr(self.bus, item)(*args, **kwargs) if item else None
         except KeyError:
-            raise Exception("Unregistered method or attribute {}".format(method))
+            raise Exception(
+                "Unregistered method or attribute {}".format(method))
 
     def _mapping(self):
         self.map = {
@@ -49,4 +51,3 @@ class UART(object):
                 "flushOutput": ""
             },
         }
-

@@ -91,7 +91,17 @@ FUEL_TYPE_DESCRIPTION = (
     'Bifuel running diesel'
 )
 
-# Mode 01 PID 12 returns a single byte of data which describes the secondary air status.
+FUEL_SYSTEM_STATUS_DESC = {
+    0: 'No fuel system available',
+    1: 'Open loop due to insufficient engine temperature',
+    2: 'Closed loop, using oxygen sensor feedback to determine fuel mix',
+    4: 'Open loop due to engine load OR fuel cut to deceleration',
+    8: 'Open loop due to system failure',
+    16: 'Closed loop, using at least one oxygen sensor but there is a fault in the feedback system'
+}
+
+# Mode 01 PID 12 returns a single byte of data which describes the
+# secondary air status.
 SECONDARY_AIR_STATUS = {
     1: 'Upstream',
     2: 'Downstream of catalytic converter',
@@ -99,8 +109,10 @@ SECONDARY_AIR_STATUS = {
     8: 'Pump commanded on for diagnostics',
 }
 
-# Mode 01 PID 1C returns a single byte of data which describes which OBD standards.
+# Mode 01 PID 1C returns a single byte of data which describes which OBD
+# standards.
 OBD_STANDARDS = (
+    None,
     'OBD-II as defined by the CARB',
     'OBD as defined by the EPA',
     'OBD and OBD-II',
@@ -135,3 +147,23 @@ OBD_STANDARDS = (
     'India OBD II (IOBD II)',
     'Heavy Duty Euro OBD Stage VI (HD EOBD-IV)'
 )
+
+DTCs_table = {
+    '0': 'P0',
+    '1': 'P1',
+    '2': 'P2',
+    '3': 'P3',
+    '4': 'C0',
+    '5': 'C1',
+    '6': 'C2',
+    '7': 'C3',
+    '8': 'B0',
+    '9': 'B1',
+    'A': 'B2',
+    'B': 'B3',
+    'C': 'U0',
+    'D': 'U1',
+    'E': 'U2',
+    'F': 'U3'
+
+}

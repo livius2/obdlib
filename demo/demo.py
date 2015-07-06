@@ -1,14 +1,14 @@
-import scanner
+import obdlib.scanner as scanner
 import time
 
 # Example 1
 # Retrieves value from one sensor
-with scanner.OBDScanner("/dev/pts/5") as scan:
+with scanner.OBDScanner("/dev/pts/6") as scan:
     while True:
         if scan.sensor:
             if scan.sensor.is_pids():
                 # Engine coolant temperature
-                sensor = scan.sensor[01](05)
+                sensor = scan.sensor[1](5)
                 # two or more ECU's respond to one request
                 # we should be prepared for it
                 for ecu, value in sensor.ecus:
@@ -21,7 +21,7 @@ with scanner.OBDScanner("/dev/pts/5") as scan:
 
 # Example 2
 # Retrieves all available sensor values
-with scanner.OBDScanner("/dev/pts/5") as scan:
+with scanner.OBDScanner("/dev/pts/6") as scan:
     while True:
         if scan.sensor:
             if scan.sensor.is_pids():
@@ -41,3 +41,20 @@ with scanner.OBDScanner("/dev/pts/5") as scan:
                 raise Exception("Pids are not supported")
         else:
             break
+
+# Example 3
+# Retrieves trouble codes (DTCs)
+with scanner.OBDScanner("/dev/pts/6") as scan:
+    if scan.sensor:
+        if scan.sensor.is_pids():
+            # Monitor status since DTCs cleared
+            sensor = scan.sensor[1](1)
+            for ecu, value in sensor.ecus:
+                print("ECU: {} \nMonitor Statuses {}".format(ecu, value))
+
+            # gets DTCs
+            sensor = scan.sensor[3]()
+            for ecu, value in sensor.ecus:
+                print("ECU: {} \nTrouble codes {}".format(ecu, value))
+        else:
+            raise Exception("Pids are not supported")

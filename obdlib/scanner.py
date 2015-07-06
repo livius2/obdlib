@@ -1,12 +1,13 @@
 import time
-import uart
-import elm327
-from obd import commands
-from obd import sensors
-from response import Response
+import obdlib.uart as uart
+import obdlib.elm327 as elm327
+from obdlib.obd import commands
+from obdlib.obd import sensors
+from obdlib.response import Response
 
 
 class OBDScanner(object):
+
     """
         ELM327 OBD-II Scanner
 
@@ -40,7 +41,9 @@ class OBDScanner(object):
             Opens a connection to an ELM327 OBD-II Interface
             :return:
         """
-        self.uart_port = uart.UART().connection(self.pb_str, baudrate=self.baud)
+        self.uart_port = uart.UART().connection(
+            self.pb_str,
+            baudrate=self.baud)
 
         if self.is_port():
             self.initialize()
@@ -88,26 +91,35 @@ class OBDScanner(object):
             # logging error
             raise Exception("Echo command did not completed")
 
-        if not self._check_response(self.send(elm327.SPACES_OFF_COMMAND).raw_value):
+        if not self._check_response(
+            self.send(
+                elm327.SPACES_OFF_COMMAND).raw_value):
             # logging error
             print("Spaces off command did not completed")
 
-        if not self._check_response(self.send(elm327.LINEFEED_OFF_COMMAND).raw_value):
+        if not self._check_response(
+            self.send(
+                elm327.LINEFEED_OFF_COMMAND).raw_value):
             # logging error
             print("Line feed off command did not completed")
 
         # Disable memory function
         self.send(elm327.MEMORY_OFF_COMMAND)
 
-        if not self._check_response(self.send(elm327.SET_PROTOCOL_AUTO_COMMAND).raw_value):
+        if not self._check_response(
+            self.send(
+                elm327.SET_PROTOCOL_AUTO_COMMAND).raw_value):
             # logging error
             raise Exception("Set protocol command did not completed")
 
-        if not self._check_response(self.send(elm327.HEADER_ON_COMMAND).raw_value):
+        if not self._check_response(
+            self.send(
+                elm327.HEADER_ON_COMMAND).raw_value):
             # logging error
             raise Exception("Enable header command did not completed")
 
-        self.obd_protocol = self.send(elm327.DESCRIBE_PROTOCOL_NUMBER_COMMAND).at_value
+        self.obd_protocol = self.send(
+            elm327.DESCRIBE_PROTOCOL_NUMBER_COMMAND).at_value
         self.sensor = sensors.Command(self.send, self.units)
 
         # checks connection with vehicle
@@ -124,7 +136,7 @@ class OBDScanner(object):
         if len(number) == 2 and 'A' in number:
             number = int(number[-1], 16)
 
-        return number
+        return number if number else 0
 
     def receive(self):
         """
@@ -198,7 +210,9 @@ class OBDScanner(object):
             indicator lamp (MIL) / check engine light
             :return:
         """
-        if not self._check_response(self.send(commands.CLEAR_TROUBLE_CODES_COMMAND).raw_value):
+        if not self._check_response(
+            self.send(
+                commands.CLEAR_TROUBLE_CODES_COMMAND).raw_value):
             # logging error
             print("Clear trouble codes did not return success")
 
@@ -224,4 +238,5 @@ class OBDScanner(object):
         """
         self.uart_port.flushOutput()
         self.uart_port.flushInput()
-        self.uart_port.write(data + "\r\n")
+        cmd = data + "\r\n"
+        self.uart_port.write(cmd.encode())

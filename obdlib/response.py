@@ -1,4 +1,4 @@
-from obd.protocols import protocols, can_protocols
+from obdlib.obd.protocols import protocols, can_protocols
 
 
 class Response(object):
@@ -12,9 +12,11 @@ class Response(object):
         # split by term
         # remove spaces
         buff = data.decode().replace('\n', '').split('\r')
-        self.raw_data = [line.strip().replace(' ', '') for line in buff if line]
+        self.raw_data = [line.strip().replace(' ', '')
+                         for line in buff if line]
         # init protocol (CAN or rest)
-        self.protocol = can_protocols.ProtocolsCan(proto_num) if proto_num > 5 else protocols.Protocols()
+        self.protocol = can_protocols.ProtocolsCan(
+            proto_num) if proto_num > 5 else protocols.Protocols()
 
     def _check_value(func):
         """
@@ -23,6 +25,7 @@ class Response(object):
         """
 
         def wrapper(self):
+
             if '?' in self.raw_data[:1]:
                 return None
             else:
@@ -51,4 +54,4 @@ class Response(object):
         """
             Retrieves all available data (raw)
         """
-        return self.raw_data[:1][0]
+        return self.raw_data[:1][0] if self.raw_data else []

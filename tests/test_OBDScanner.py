@@ -1,15 +1,20 @@
 import unittest
-import mock
-import scanner
+import sys
+
+if sys.version_info[0] < 3:
+    import mock
+else:
+    import unittest.mock as mock
+import obdlib.scanner as scanner
 
 
 class TestOBDScanner(unittest.TestCase):
     def setUp(self):
         self.scan = scanner.OBDScanner("/dev/null")
 
-    @mock.patch('scanner.OBDScanner.is_port')
-    @mock.patch('scanner.OBDScanner.initialize')
-    @mock.patch('uart.UART.connection')
+    @mock.patch('obdlib.scanner.OBDScanner.is_port')
+    @mock.patch('obdlib.scanner.OBDScanner.initialize')
+    @mock.patch('obdlib.uart.UART.connection')
     def test_connection(self, mock_uart, mock_init, mock_is_port):
         mock_is_port.return_value = True
         self.scan.connect()
@@ -29,14 +34,14 @@ class TestOBDScanner(unittest.TestCase):
         is_port = self.scan.is_port()
         self.assertTrue(is_port)
 
-    @mock.patch('scanner.OBDScanner.send')
+    @mock.patch('obdlib.scanner.OBDScanner.send')
     def test_battery_voltage(self, mock_send):
         volt = self.scan.battery_voltage()
         self.assertEqual(mock_send.call_count, 1)
         self.assertEqual(mock_send.call_args_list[0][0], ('ATRV',))
 
-    @mock.patch('scanner.OBDScanner.reset')
-    @mock.patch('scanner.OBDScanner.is_port')
+    @mock.patch('obdlib.scanner.OBDScanner.reset')
+    @mock.patch('obdlib.scanner.OBDScanner.is_port')
     def test_disconnect(self, mock_is_port, mock_reset):
         # is_port True
         mock_is_port.return_value = True
@@ -59,12 +64,12 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(mock_reset.call_count, 0)
         self.assertEqual(self.scan.uart_port.close.call_count, 0)
 
-    #@mock.patch('sys.stdout')
-    @mock.patch('scanner.sensors.Command')
-    @mock.patch('scanner.OBDScanner.send')
-    @mock.patch('scanner.OBDScanner.echo_off')
-    @mock.patch('scanner.OBDScanner.reset')
-    def test_initialize(self, mock_reset, mock_echo, mock_send, mock_sensor):
+    @mock.patch('sys.stdout')
+    @mock.patch('obdlib.scanner.sensors.Command')
+    @mock.patch('obdlib.scanner.OBDScanner.send')
+    @mock.patch('obdlib.scanner.OBDScanner.echo_off')
+    @mock.patch('obdlib.scanner.OBDScanner.reset')
+    def test_initialize(self, mock_reset, mock_echo, mock_send, mock_sensor, mock_out):
         exception = ''
 
         def send(data):
@@ -74,6 +79,7 @@ class TestOBDScanner(unittest.TestCase):
 
             return r_v
 
+        # if connected, each request returns OK
         mock_echo.return_value = ['OK']
         r_value = ['OK']
         a_value = 'A5'
@@ -90,6 +96,7 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(mock_send.call_count, 6)
         self.assertEqual(mock_sensor.call_args_list[0][0], (mock_send, 0))
 
+        # if not connected
         mock_reset.reset_mock()
         mock_echo.reset_mock()
         mock_send.reset_mock()
@@ -102,7 +109,7 @@ class TestOBDScanner(unittest.TestCase):
             self.scan.initialize()
         self.assertEqual(cm.exception.__str__(), 'Failed connection to the OBD2 interface!')
 
-        # Exception
+        # Exception, check Echo
         mock_reset.reset_mock()
         mock_echo.reset_mock()
         mock_send.reset_mock()
@@ -117,30 +124,29 @@ class TestOBDScanner(unittest.TestCase):
             self.scan.initialize()
         self.assertEqual(cm.exception.__str__(), 'Echo command did not completed')
 
-        #for item in range(4):
-        #    mock_reset.reset_mock()
-        #    mock_echo.reset_mock()
-        #    mock_send.reset_mock()
-        #    mock_sensor.reset_mock()
+        mock_reset.reset_mock()
+        mock_echo.reset_mock()
+        mock_send.reset_mock()
+        mock_sensor.reset_mock()
 
-        #    mock_echo.return_value = ['OK']
-        #    a_value = 'A5'
-        #    send.counter = item
-        #    mock_send.side_effect = send
+        mock_echo.return_value = ['OK']
+        r_value = ['']
+        a_value = 'A5'
+        mock_send.side_effect = send
 
-        #    with self.assertRaises(Exception) as cm:
-        #        self.scan.initialize()
-        #    self.assertEqual(cm.exception.__str__(), 'Set protocol command did not completed')
+        with self.assertRaises(Exception) as cm:
+            self.scan.initialize()
+        self.assertEqual(cm.exception.__str__(), "Set protocol command did not completed")
 
     def test_get_proto_num(self):
         self.scan.obd_protocol = 'AA'
         num = self.scan.get_proto_num()
         self.assertEqual(num, 10)
 
-    @mock.patch('scanner.OBDScanner.get_proto_num')
-    @mock.patch('scanner.OBDScanner.is_port')
+    @mock.patch('obdlib.scanner.OBDScanner.get_proto_num')
+    @mock.patch('obdlib.scanner.OBDScanner.is_port')
     def test_receive(self, mock_is_port, mock_proto_num):
-        from response import Response
+        from obdlib.response import Response
 
         buffer = 'ATZ\r\x00\n>'
 
@@ -185,8 +191,8 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(self.scan.uart_port.read.call_count, 11)
         self.assertEqual(self.scan.uart_port.read.call_args_list[0][0], (1,))
 
-    @mock.patch('scanner.OBDScanner.send')
-    @mock.patch('scanner.OBDScanner.is_port')
+    @mock.patch('obdlib.scanner.OBDScanner.send')
+    @mock.patch('obdlib.scanner.OBDScanner.is_port')
     def test_reset(self, mock_is_port, mock_send):
         mock_is_port.return_value = True
         self.scan.reset()
@@ -195,12 +201,12 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(mock_send.call_count, 1)
         self.assertEqual(mock_send.call_args_list[0][0], ('ATZ', 1))
 
-    @mock.patch('scanner.OBDScanner.receive')
-    @mock.patch('scanner.OBDScanner._write')
-    @mock.patch('scanner.OBDScanner.is_port')
-    @mock.patch('scanner.time.sleep')
+    @mock.patch('obdlib.scanner.OBDScanner.receive')
+    @mock.patch('obdlib.scanner.OBDScanner._write')
+    @mock.patch('obdlib.scanner.OBDScanner.is_port')
+    @mock.patch('obdlib.scanner.time.sleep')
     def test_send(self, mock_sleep, mock_is_port, mock_write, mock_receive):
-        from response import Response
+        from obdlib.response import Response
 
         mock_is_port.return_value = True
         mock_receive.return_value = Response()
@@ -243,7 +249,7 @@ class TestOBDScanner(unittest.TestCase):
         self.fail()
 
     @mock.patch('sys.stdout')
-    @mock.patch('scanner.OBDScanner.send')
+    @mock.patch('obdlib.scanner.OBDScanner.send')
     def test_clear_trouble_codes(self, mock_send, mock_out):
         def send(data):
             class r_v():
@@ -272,7 +278,7 @@ class TestOBDScanner(unittest.TestCase):
 
         self.assertIsNone(resp)
 
-    @mock.patch('scanner.OBDScanner.send')
+    @mock.patch('obdlib.scanner.OBDScanner.send')
     def test_echo_off(self, mock_send):
         def send(data):
             class r_v():
@@ -305,7 +311,7 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(self.scan.uart_port.flushInput.call_args_list[0][0], ())
 
         self.assertEqual(self.scan.uart_port.write.call_count, 1)
-        self.assertEqual(self.scan.uart_port.write.call_args_list[0][0], ('ATH1\r\n',))
+        self.assertEqual(self.scan.uart_port.write.call_args_list[0][0], (b'ATH1\r\n',))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestOBDScanner)

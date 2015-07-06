@@ -2,7 +2,6 @@ from obdlib.obd.protocols import protocols, can_protocols
 
 
 class Response(object):
-
     """
         This object contains response data and
         includes the common data analyzing
@@ -55,4 +54,4 @@ class Response(object):
         """
             Retrieves all available data (raw)
         """
-        return self.raw_data[:1][0]
+        return self.raw_data[:1][0] if self.raw_data else []

@@ -1,7 +1,8 @@
-from elm327 import NO_RESULT
+from obdlib.elm327 import NO_RESULT
 
 
 class Base(object):
+
     def __init__(self):
         # see ELM spec. p. 25
         self.protocols = {
@@ -64,7 +65,7 @@ class Base(object):
             # logging error
             print('Error: mode {} - {}'.format(data[0][2:4],  # mode
                                                codes.get(int(data[0][-2:])))  # code
-            )
+                  )
             response = False
 
         return response

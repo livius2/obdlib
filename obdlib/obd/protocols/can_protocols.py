@@ -1,7 +1,8 @@
-from obd.protocols.base import Base
+from obdlib.obd.protocols.base import Base
 
 
 class ProtocolsCan(Base):
+
     """
         Supports the CAN protocol (from 6 ...)
     """
@@ -34,18 +35,22 @@ class ProtocolsCan(Base):
         if raw_data:
             ecu_messages = self.remove_searching(raw_data)
 
-            if self.check_result(ecu_messages) and self.check_error(ecu_messages):
+            if self.check_result(
+                    ecu_messages) and self.check_error(ecu_messages):
                 # if the header enabled
                 if self.header:
                     # multi line (ELM spec page 42) or single frame response
                     if len(ecu_messages):
+                        data_start_byte = 4
                         # sorts ECU's messages
                         ecu_messages = sorted(ecu_messages)
 
                         if self.header_bits == self.header_11:
                             # align CAN header (11 bits, 29 bits)
                             # PCI byte are 8 and 9 indexes
-                            ecu_messages = [self.add_bits + mess for mess in ecu_messages]
+                            ecu_messages = [
+                                self.add_bits +
+                                mess for mess in ecu_messages]
 
                         for message in ecu_messages:
                             ecu_number = message[6:8]
@@ -56,7 +61,7 @@ class ProtocolsCan(Base):
                             if response_mode == 43:
                                 # add fake byte after the mode one
                                 # nothing to do
-                                pass
+                                data_start_byte = 2
 
                             # Single Frame
                             if f_type == self.mess_SF:
@@ -66,7 +71,8 @@ class ProtocolsCan(Base):
                                 # 29 bits header:
                                 # 18 DA F1 10 06 41 00 FF FF FF FF FC
                                 count_byte = int(message[9], 16)
-                                data[ecu_number] = message[10:10 + count_byte * 2][4:]
+                                data[ecu_number] = message[
+                                    10:10 + count_byte * 2][data_start_byte:]
 
                             # multi line frame
                             # the First Frame (of a multi frame message)

@@ -1,6 +1,11 @@
 import unittest
-import unittest.mock as mock
-import obd.sensors as sensors
+import sys
+
+if sys.version_info[0] < 3:
+    import mock
+else:
+    import unittest.mock as mock
+import obdlib.obd.sensors as sensors
 
 
 class TestCommand(unittest.TestCase):

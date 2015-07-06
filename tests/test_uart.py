@@ -1,6 +1,11 @@
 import unittest
-import unittest.mock as mock
-import uart
+import sys
+
+if sys.version_info[0] < 3:
+    import mock
+else:
+    import unittest.mock as mock
+import obdlib.uart as uart
 import serial
 
 
@@ -10,8 +15,8 @@ class TestUART(unittest.TestCase):
         self.tUART = uart.UART()
 
     @mock.patch('sys.stdout')
-    @mock.patch('uart.UART._mapping')
-    @mock.patch('uart.uart_base')
+    @mock.patch('obdlib.uart.UART._mapping')
+    @mock.patch('obdlib.uart.uart_base')
     def test_connection(self, mock_ubase, mock_map, mock_out):
         resp = self.tUART.connection('/dev/null')
         self.assertEqual(mock_ubase.call_count, 1)
@@ -66,6 +71,7 @@ class TestUART(unittest.TestCase):
         self.tUART._mapping()
         self.assertIsInstance(self.tUART.map, dict)
         self.assertEqual(self.tUART.map, expected)
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestUART)
 unittest.TextTestRunner(verbosity=2).run(suite)

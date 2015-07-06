@@ -1,4 +1,4 @@
-from obd.pids import *
+from obdlib.obd.pids import *
 from binascii import unhexlify
 
 unit_english = 0
@@ -19,8 +19,12 @@ def zfill(string, width):
         :param width: width of the resulted string
         :return: a string that has been aligned to the width
     """
-    return string.zfill(width) \
-        if hasattr(string, 'zfill') else ('{0:0%d}' % (width)).format(int(string))
+    return string.zfill(width) if hasattr(
+        string,
+        'zfill') else (
+        '{0:0%d}' %
+        (width)).format(
+            int(string))
 
 
 def bitwise_pids(hex_string, start=0):
@@ -163,7 +167,8 @@ def obd_standards(value):
         Converts the vehicle's OBD standards this vehicle conforms to
         :return: the current engine value
     """
-    return OBD_STANDARDS[__digit(value)] if len(OBD_STANDARDS) >= __digit(value) else None
+    return OBD_STANDARDS[__digit(value)] if len(
+        OBD_STANDARDS) >= __digit(value) else None
 
 
 def time(value):

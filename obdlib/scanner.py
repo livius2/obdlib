@@ -118,15 +118,15 @@ class OBDScanner(object):
             # logging error
             raise Exception("Enable header command did not completed")
 
-        self.obd_protocol = self.send(
-            elm327.DESCRIBE_PROTOCOL_NUMBER_COMMAND).at_value
         self.sensor = sensors.Command(self.send, self.units)
-
         # checks connection with vehicle
         self.__connected = self.sensor.check_pids()
 
         if not self.__connected:
             raise Exception("Failed connection to the OBD2 interface!")
+
+        self.obd_protocol = self.send(
+            elm327.DESCRIBE_PROTOCOL_NUMBER_COMMAND).at_value
 
     def get_proto_num(self):
         """

@@ -128,6 +128,9 @@ class OBDScanner(object):
         self.obd_protocol = self.send(
             elm327.DESCRIBE_PROTOCOL_NUMBER_COMMAND).at_value
 
+        # gets available pids
+        self.sensor.check_pids()
+
     def get_proto_num(self):
         """
             Retrieves the protocol number (response format is - A4)

@@ -200,9 +200,43 @@ class OBDScanner(object):
     def vehicle_id_number(self):
         """
             Returns the vehicle's identification number (VIN)
-            :return:
+            :return dict {ecu: number}
         """
-        return self.send(commands.VEHICLE_ID_NUMBER_COMMAND)
+        sensor = self.sensor[9](2)
+        vin = {}
+        for ecu, value in sensor.ecus:
+            vin[ecu] = value
+        return vin
+
+    def get_basic_info(self):
+        """
+            Returns general vehicle's information
+            :return dict
+        """
+        gen_info = {}
+
+        # complies with OBD std
+        sensor = self.sensor[1](28)
+        obd = {}
+        for ecu, value in sensor.ecus:
+            obd[ecu] = value
+        gen_info[sensor.title] = obd
+
+        # fuel type
+        sensor = self.sensor[1](81)
+        f_type = {}
+        for ecu, value in sensor.ecus:
+            f_type[ecu] = value
+        if f_type:
+            gen_info[sensor.title] = f_type
+
+        # get VIN
+        gen_info['VIN'] = self.vehicle_id_number()
+
+        # battery voltage
+        gen_info['BATTERY_VOLTAGE'] = self.battery_voltage()
+
+        return gen_info
 
     def clear_trouble_codes(self):
         """

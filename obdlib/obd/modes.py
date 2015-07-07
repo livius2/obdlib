@@ -9,7 +9,7 @@ OXYGEN_SENSOR_DATA = "05"
 SYSTEM_MONITORING_DATA = "06"
 PENDING_TROUBLE_CODES = "07"
 CONTROL_OPERATION = "08"
-VEHICLE_INFORMATION_DATA = "09"
+VEHICLE_INFORMATION_DATA = 9
 PERMANENT_TROUBLE_CODES = "0A"
 
 DEFAULT_OBD_MODE = CURRENT_DATA
@@ -300,7 +300,13 @@ class Modes(object):
                 (),
                 (),
                 (),
-                (),
+                ("FUEL_TYPE",
+                 "Fuel Type",
+                 "0151",
+                 1,
+                 "",
+                 fuel_type,
+                 None),
                 (),
                 (),
                 (),
@@ -324,5 +330,22 @@ class Modes(object):
                  "",
                  trouble_codes,
                  None),
+            ),
+            VEHICLE_INFORMATION_DATA: (
+                ("PIDS_I",
+                 "Mode 9 supported PIDs (01 to 20)",
+                 "0900",
+                 4,
+                 "",
+                 lambda v: v,
+                 None),
+                (),
+                ("VIN",
+                 "Vehicle Identification Number (VIN)",
+                 "0902",
+                 "17-20",
+                 "",
+                 vin,
+                 None)
             )
         }

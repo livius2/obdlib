@@ -97,6 +97,7 @@ class Command(object):
 
     def __getitem__(self, mode):
         try:
+            self.__ecus = {}
             def get_pid(pid=0):
                 self.init(self.__modes.modes[mode][pid])
                 self.__ecus.update(

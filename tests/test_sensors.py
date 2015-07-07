@@ -61,8 +61,7 @@ class TestCommand(unittest.TestCase):
 
         self.s._Command__ecus = {'E8': '1', 'E9': '2'}
         resp = self.s.check_pids()
-
-        self.assertTrue(resp)
+        self.assertIsNone(resp)
 
     def test_is_pids(self):
         self.s._Command__pids = {

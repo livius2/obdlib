@@ -63,6 +63,7 @@ class Command(object):
             Checks available PIDs. If return data, it means connected True
             Prepares the ELM327 for communicating with vehicle - 01 pid 00
         """
+        self.__pids = {}
         pids = self[1](0)  # 01 00
         if pids and isinstance(pids.__ecus, dict) and len(pids.__ecus):
             self.__pids.update(pids.__ecus)
@@ -71,6 +72,7 @@ class Command(object):
             #        self.__pids[ecu].update(self[01](int('20', 16)).__ecus[ecu])
             #        if self.__pids[ecu][str(40)]:
             # self.__pids[ecu].update(self[01](int('40', 16)).__ecus[ecu])
+
             return True
 
     def is_pids(self):

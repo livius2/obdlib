@@ -75,6 +75,10 @@ class TestCommand(unittest.TestCase):
         resp = self.s.check_pids()
         self.assertIsNone(resp)
 
+        self.s._Command__ecus = {'E8': '1', 'E9': '2'}
+        resp = self.s.check_pids()
+        self.assertIsNone(resp)
+
     def test_is_pids(self):
         self.s._Command__pids = {
             'E8': {'00': 0, '01': 0},

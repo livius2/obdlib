@@ -125,6 +125,7 @@ class Command(object):
                             pid))
 
                 self.init(pid_info)
+
                 self.__ecus.update(
                     dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.items())
                 )

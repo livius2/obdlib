@@ -44,9 +44,9 @@ class TestOBDScanner(unittest.TestCase):
 
         class p(object):
             def __init__(self, n):
-                if int(n, 16) == 28:
+                if int(n) == 28:
                     self.values = {'E8': 'OBD and OBD-II'}
-                if int(n, 16) == 81:
+                if int(n) == 81:
                     self.values = {'E8': 'Gasoline'}
 
             @property
@@ -57,9 +57,9 @@ class TestOBDScanner(unittest.TestCase):
         def mode(a):
             def pid(n):
                 pid.ecus = p(n).gen
-                if int(n, 16) == 28:
+                if int(n) == 28:
                     pid.title = 'OBD'
-                if int(n, 16) == 81:
+                if int(n) == 81:
                     pid.title = 'FUEL_TYPE'
                 return pid
 

@@ -24,7 +24,7 @@ def zfill(string, width):
         'zfill') else (
         '{0:0%d}' %
         (width)).format(
-            __digit(string))
+        __digit(string))
 
 def bitwise_pids(hex_string, start=0):
     """

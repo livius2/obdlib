@@ -205,7 +205,7 @@ class OBDScanner(object):
             Returns the vehicle's identification number (VIN)
             :return dict {ecu: number}
         """
-        sensor = self.sensor[9](2)
+        sensor = self.sensor[9]('02')
         vin = {}
         for ecu, value in sensor.ecus:
             vin[ecu] = value
@@ -219,14 +219,14 @@ class OBDScanner(object):
         gen_info = {}
 
         # complies with OBD std
-        sensor = self.sensor[1](28)
+        sensor = self.sensor[1]('1C')
         obd = {}
         for ecu, value in sensor.ecus:
             obd[ecu] = value
         gen_info[sensor.title] = obd
 
         # fuel type
-        sensor = self.sensor[1](81)
+        sensor = self.sensor[1]('51')
         f_type = {}
         for ecu, value in sensor.ecus:
             f_type[ecu] = value

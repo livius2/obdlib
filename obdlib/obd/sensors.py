@@ -71,7 +71,6 @@ class Command(object):
                     self.__pids[ecu].update(self[1]('20').__ecus[ecu])
                 if self.__pids[ecu].get('40'):  # add 41-60 pids if available
                     self.__pids[ecu].update(self[1]('40').__ecus[ecu])
-
             return True
 
     def is_pids(self, check=True):
@@ -126,7 +125,6 @@ class Command(object):
                             pid))
 
                 self.init(pid_info)
-
                 self.__ecus.update(
                     dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.items())
                 )
@@ -135,4 +133,3 @@ class Command(object):
                 print(err)
             return self
         return get_pid
-

@@ -51,15 +51,27 @@ class TestCommand(unittest.TestCase):
         for item in s:
             self.assertIsInstance(item, sensors.Command)
 
+    def test_check_pids_true(self):
+        def mode(a):
+            def pid(n):
+                pid._Command__ecus = {'E8': {'00': 1}, 'E9': {'20': 1, '40': 1}}
+                return pid
+
+            return pid
+
+        gi = sensors.Command.__getitem__
+        sensors.Command.__getitem__ = mock.MagicMock()
+        sensors.Command.__getitem__.side_effect = mode
+
+        resp = self.s.check_pids()
+        self.assertTrue(resp)
+
+        sensors.Command.__getitem__ = gi
+
     def test_check_pids(self):
         self.s._Command__modes.modes = mock.MagicMock()
         self.s.init = mock.MagicMock()
         self.s._Command__call = mock.MagicMock()
-        resp = self.s.check_pids()
-
-        self.assertIsNone(resp)
-
-        self.s._Command__ecus = {'E8': '1', 'E9': '2'}
         resp = self.s.check_pids()
         self.assertIsNone(resp)
 
@@ -108,6 +120,18 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(self.s._Command__decoder.call_args[0], ('1A',))
         self.assertEqual(self.s._Command__decoder.call_args[1], {'param': 'value'})
         self.assertIsInstance(resp, mock.Mock)
+
+    @mock.patch('sys.stdout')
+    def test_getitem(self, mock_out):
+        self.s.__getitem__(1)(0)
+        self.s.__getitem__(1)('01')
+
+        self.s._Command__modes.modes = mock.MagicMock()
+        self.s.init = mock.MagicMock()
+        self.s._Command__call = mock.MagicMock()
+        self.s.__getitem__(1)('00')
+        self.assertEqual(self.s.init.call_count, 1)
+        self.assertEqual(self.s._Command__call.call_count, 1)
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestCommand)

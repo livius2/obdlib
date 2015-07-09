@@ -118,15 +118,18 @@ class OBDScanner(object):
             # logging error
             raise Exception("Enable header command did not completed")
 
-        self.obd_protocol = self.send(
-            elm327.DESCRIBE_PROTOCOL_NUMBER_COMMAND).at_value
         self.sensor = sensors.Command(self.send, self.units)
-
         # checks connection with vehicle
         self.__connected = self.sensor.check_pids()
 
         if not self.__connected:
             raise Exception("Failed connection to the OBD2 interface!")
+
+        self.obd_protocol = self.send(
+            elm327.DESCRIBE_PROTOCOL_NUMBER_COMMAND).at_value
+
+        # gets available pids
+        self.sensor.check_pids()
 
     def get_proto_num(self):
         """
@@ -200,9 +203,43 @@ class OBDScanner(object):
     def vehicle_id_number(self):
         """
             Returns the vehicle's identification number (VIN)
-            :return:
+            :return dict {ecu: number}
         """
-        return self.send(commands.VEHICLE_ID_NUMBER_COMMAND)
+        sensor = self.sensor[9]('02')
+        vin = {}
+        for ecu, value in sensor.ecus:
+            vin[ecu] = value
+        return vin
+
+    def get_basic_info(self):
+        """
+            Returns general vehicle's information
+            :return dict
+        """
+        gen_info = {}
+
+        # complies with OBD std
+        sensor = self.sensor[1]('1C')
+        obd = {}
+        for ecu, value in sensor.ecus:
+            obd[ecu] = value
+        gen_info[sensor.title] = obd
+
+        # fuel type
+        sensor = self.sensor[1]('51')
+        f_type = {}
+        for ecu, value in sensor.ecus:
+            f_type[ecu] = value
+        if f_type:
+            gen_info[sensor.title] = f_type
+
+        # get VIN
+        gen_info['VIN'] = self.vehicle_id_number()
+
+        # battery voltage
+        gen_info['BATTERY_VOLTAGE'] = self.battery_voltage()
+
+        return gen_info
 
     def clear_trouble_codes(self):
         """

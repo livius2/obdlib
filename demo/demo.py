@@ -8,7 +8,7 @@ with scanner.OBDScanner("/dev/pts/6") as scan:
         if scan.sensor:
             if scan.sensor.is_pids():
                 # Engine coolant temperature
-                sensor = scan.sensor[1](5)
+                sensor = scan.sensor[1]('05')
                 # two or more ECU's respond to one request
                 # we should be prepared for it
                 for ecu, value in sensor.ecus:
@@ -48,7 +48,7 @@ with scanner.OBDScanner("/dev/pts/6") as scan:
     if scan.sensor:
         if scan.sensor.is_pids():
             # Monitor status since DTCs cleared
-            sensor = scan.sensor[1](1)
+            sensor = scan.sensor[1]('01')
             for ecu, value in sensor.ecus:
                 print("ECU: {} \nMonitor Statuses {}".format(ecu, value))
 

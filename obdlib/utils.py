@@ -24,7 +24,7 @@ def zfill(string, width):
         'zfill') else (
         '{0:0%d}' %
         (width)).format(
-            int(string))
+        __digit(string))
 
 
 def bitwise_pids(hex_string, start=0):
@@ -299,11 +299,10 @@ def dtc_statuses(value):
             (0, 0),  # PM-Filter-Monitoring
             (0, 0)  # EGR/VVT-System
         ]}
-    from pprint import pprint
     # converts hex string to bits string
     value = bin(__digit(value))[2:]
     monitor_statuses['mil'] = int(value[0])  # A7
-    monitor_statuses['dtc'] = int(value[1:8])  # A6-A0
+    monitor_statuses['dtc'] = int(value[1:8], 2)  # A6-A0
     monitor_statuses['ignition_test'] = int(value[11])  # B3
 
     for item in range(3):

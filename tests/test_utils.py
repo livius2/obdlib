@@ -135,16 +135,19 @@ class TestUtils(unittest.TestCase):
     def test_dtc_statuses(self):
         expected = {'base_tests': [(0, 0), (0, 1), (0, 1)],
                     'compression_tests': [(0, 0), (1, 0), (0, 0), (1, 1), (0, 0), (1, 0)],
-                    'dtc': 1,
+                    'dtc': 3,
                     'ignition_test': 0,
                     'mil': 1,
                     'spark_tests': [(0, 0), (1, 0), (1, 0), (0, 0), (0, 0), (1, 1), (0, 0), (1, 0)]}
-        statuses = utils.dtc_statuses('81076504')
+        statuses = utils.dtc_statuses('83076504')
         self.assertEqual(statuses, expected)
 
     def test_trouble_codes(self):
         dtc_s = utils.trouble_codes('0133D0161131')
         self.assertEqual(dtc_s, ['P0133', 'U1016', 'P1131'])
+
+        dtc_s = utils.trouble_codes('013300000000')
+        self.assertEqual(dtc_s, ['P0133'])
 
     def test_bitwise_pids(self):
         """

@@ -5,6 +5,7 @@ if sys.version_info[0] < 3:
     import mock
 else:
     import unittest.mock as mock
+
 import obdlib.response as response
 
 
@@ -89,5 +90,6 @@ class TestResponse(unittest.TestCase):
         self.assertEqual(resp.at_value, expected_data)
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestResponse)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestResponse)
+    unittest.TextTestRunner(verbosity=2).run(suite)

@@ -5,6 +5,7 @@ if sys.version_info[0] < 3:
     import mock
 else:
     import unittest.mock as mock
+
 import obdlib.scanner as scanner
 
 
@@ -33,7 +34,6 @@ class TestOBDScanner(unittest.TestCase):
         self.scan.uart_port = object
         is_port = self.scan.is_port()
         self.assertTrue(is_port)
-
 
     @mock.patch('obdlib.scanner.OBDScanner.vehicle_id_number')
     @mock.patch('obdlib.scanner.OBDScanner.battery_voltage')
@@ -373,5 +373,6 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(self.scan.uart_port.write.call_args_list[0][0], (b'ATH1\r\n',))
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestOBDScanner)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestOBDScanner)
+    unittest.TextTestRunner(verbosity=2).run(suite)

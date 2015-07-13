@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name="obdlib",
-    version="0.1",
+    version="0.2",
     license="MIT",
     author="Siarhei Boika",
     author_email="s.s.boika@gmail.com",
@@ -28,7 +28,7 @@ setup(
     test_suite='nose.collector',
     keywords=['obd', 'obdii', 'automotive'],
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
@@ -37,7 +37,6 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: Micropython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Communications",
         "Topic :: Scientific/Engineering :: Information Analysis",

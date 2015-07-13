@@ -46,7 +46,7 @@ def rpm(value):
         Converts the vehicle's current engine RPM value
         :return: the current engine RPM
     """
-    return __digit(value) / 4
+    return __digit(value) / 4.0
 
 
 def speed(value):
@@ -69,13 +69,12 @@ def load_value(value):
     """
     return __digit(value) * 100 / 255
 
-
 def term_fuel(value):
     """
         Converts the vehicle's short term fuel or long term fuel
         :return: the current engine value
     """
-    return round((__digit(value) - 128) * 100 / 128, 2)
+    return round((__digit(value) - 128) * 100 / 128.0, 2)
 
 
 def fuel_pressure(value):
@@ -109,7 +108,7 @@ def timing_advance(value):
         Converts the vehicle's Timing advance
         :return: the current engine value
     """
-    return (__digit(value) - 128) / 2
+    return round((__digit(value) - 128) / 2.0, 2)
 
 
 def air_flow_rate(value):
@@ -117,7 +116,7 @@ def air_flow_rate(value):
         Converts the vehicle's MAF air flow rate
         :return: the current engine value
     """
-    return __digit(value) / 100
+    return round(__digit(value) / 100.0, 2)
 
 
 def throttle_pos(value):
@@ -253,7 +252,7 @@ def oxygen_sensors(value):
     #
     # if PID 1D - Similar to PID 13,
     # but [A0..A7] == [B1S1, B1S2, B2S1, B2S2, B3S1, B3S2, B4S1, B4S2]
-    value = bin(__digit(value))[2:][::-1]
+    value = bin(__digit(value))[2:]
     sensors = []
     for sensor in value:
         if sensor:
@@ -267,7 +266,7 @@ def aux_input_status(value):
         :return: boolean, Power Take Off (PTO) status
         True - active
     """
-    return bin(__digit(value))[2:][::-1][0] == '1'
+    return bin(__digit(value))[2:][0] == '1'
 
 
 def dtc_statuses(value):

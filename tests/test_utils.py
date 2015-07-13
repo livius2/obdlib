@@ -125,7 +125,7 @@ class TestUtils(unittest.TestCase):
     def test_oxygen_sensors(self):
         self.assertEqual(utils.oxygen_sensors(
             'FC'),
-            [0, 0, 1, 1, 1, 1, 1, 1]
+            [1, 1, 1, 1, 1, 1, 0, 0]
         )
 
     def test_aux_input_status(self):

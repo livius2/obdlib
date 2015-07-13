@@ -1,4 +1,4 @@
-|build | |version|
+|build| |version|
 
 Python OBD Library
 == == == == == == == == ==
@@ -60,5 +60,8 @@ See LICENSE_ for details.
 .. _LICENSE:
     LICENSE.txt
 
-.. | version | image:: https://badge.fury.io/py/obdlib.svg
+.. |build| image:: https://travis-ci.org/s-s-boika/obdlib.svg
+    :target: https://travis-ci.org/s-s-boika/obdlib
+
+.. |version| image:: https://badge.fury.io/py/obdlib.svg
     :target: https://pypi.python.org/pypi/obdlib/

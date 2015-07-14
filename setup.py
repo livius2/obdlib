@@ -15,7 +15,7 @@ setup(
     author_email="s.s.boika@gmail.com",
     description="OBD Library",
     long_description=__doc__,
-    packages=["obdlib", "obdlib.obd"],
+    packages=["obdlib", "obdlib.obd", "obdlib.obd.protocols"],
     zip_safe=False,
     include_package_data=True,
     platforms="any",

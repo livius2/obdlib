@@ -5,6 +5,7 @@ if sys.version_info[0] < 3:
     import mock
 else:
     import unittest.mock as mock
+
 import obdlib.scanner as scanner
 
 
@@ -33,6 +34,48 @@ class TestOBDScanner(unittest.TestCase):
         self.scan.uart_port = object
         is_port = self.scan.is_port()
         self.assertTrue(is_port)
+
+    @mock.patch('obdlib.scanner.OBDScanner.vehicle_id_number')
+    @mock.patch('obdlib.scanner.OBDScanner.battery_voltage')
+    def test_get_basic_info(self, mock_voltage, mock_vin):
+        mock_vin.return_value = {'E8': '2312KJLKJHLKJ43L34323'}
+        mock_voltage.return_value = 12.7
+        self.scan.sensor = mock.MagicMock()
+
+        class p(object):
+            def __init__(self, n):
+                if int(n, 16) == 28:
+                    self.values = {'E8': 'OBD and OBD-II'}
+                if int(n, 16) == 81:
+                    self.values = {'E8': 'Gasoline'}
+
+            @property
+            def gen(self):
+                for ecu, value in self.values.items():
+                    yield (ecu, value)
+
+        def mode(a):
+            def pid(n):
+                pid.ecus = p(n).gen
+                if int(n, 16) == 28:
+                    pid.title = 'OBD'
+                if int(n, 16) == 81:
+                    pid.title = 'FUEL_TYPE'
+                return pid
+
+            return pid
+
+        self.scan.sensor.__getitem__.side_effect = mode
+        info = self.scan.get_basic_info()
+        self.assertEqual(mock_vin.call_count, 1)
+        self.assertEqual(mock_vin.call_args_list[0][0], ())
+        self.assertEqual(info,
+                         {
+                             'BATTERY_VOLTAGE': 12.7,
+                             'OBD': {'E8': 'OBD and OBD-II'},
+                             'VIN': {'E8': '2312KJLKJHLKJ43L34323'},
+                             'FUEL_TYPE': {'E8': 'Gasoline'}
+                         })
 
     @mock.patch('obdlib.scanner.OBDScanner.send')
     def test_battery_voltage(self, mock_send):
@@ -244,9 +287,25 @@ class TestOBDScanner(unittest.TestCase):
 
         self.assertIsInstance(resp, Response)
 
-    @unittest.skip("vehicle_id_number")
     def test_vehicle_id_number(self):
-        self.fail()
+        self.scan.sensor = mock.MagicMock()
+
+        class p(object):
+            @property
+            def gen(self):
+                for ecu, value in {'E8': '2312KJLKJHLKJ43L34323'}.items():
+                    yield (ecu, value)
+
+        def mode(a):
+            def pid(n):
+                pid.ecus = p().gen
+                return pid
+
+            return pid
+
+        self.scan.sensor.__getitem__.side_effect = mode
+        vin = self.scan.vehicle_id_number()
+        self.assertEqual(vin, {'E8': '2312KJLKJHLKJ43L34323'})
 
     @mock.patch('sys.stdout')
     @mock.patch('obdlib.scanner.OBDScanner.send')
@@ -314,5 +373,7 @@ class TestOBDScanner(unittest.TestCase):
         self.assertEqual(self.scan.uart_port.write.call_args_list[0][0], (b'ATH1\r\n',))
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestOBDScanner)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestOBDScanner)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+

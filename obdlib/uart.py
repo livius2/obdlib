@@ -1,15 +1,17 @@
 DEFAULT_BAUDRATE = 38400
 import sys
+
 if (hasattr(sys, 'implementation') and
-    sys.implementation.name == 'micropython'):
+            sys.implementation.name == 'micropython'):
     # if using pyBoard
     from pyb import UART as uart_base
 else:
     from serial import Serial as uart_base
 
+from obdlib.logging import logger
+
 
 class UART(object):
-
     def __init__(self):
         self.bus_name = uart_base.__name__
         self.bus = None
@@ -21,7 +23,7 @@ class UART(object):
             self._mapping()
         except Exception as err:
             # logging exception
-            print(err)
+            logger.error(err)
             return None
 
         return self

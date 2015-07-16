@@ -1,8 +1,8 @@
 from obdlib.obd.protocols.base import Base
+from obdlib.logging import logger
 
 
 class Protocols(Base):
-
     """
         Supports next protocols - PWM, VPW, KWP (from 0 to 5)
     """
@@ -63,11 +63,11 @@ class Protocols(Base):
                             # 86 F1 10 41 00 FF FF FF FF FC  - ELM spec page 38
                             else:
                                 data[ecu_number] = self.get_data(
-                                    message[
-                                        6:check_sum])
+                                    message[6:check_sum])
                     else:
-                        # logging error
-                        raise Exception("Error response data")
+                        mess = "Error response data"
+                        logger.error(mess)
+                        raise Exception(mess)
 
         return data
 
@@ -95,7 +95,8 @@ class Protocols(Base):
             # ex: 4100FFFFFFFF - ELM spec page 38
             record = record[4:]
         else:
-            # logging error
-            raise Exception("The frame size is not suitable.")
+            mess = "The frame size is not suitable."
+            logger.error(mess)
+            raise Exception(mess)
 
         return record

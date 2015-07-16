@@ -1,8 +1,8 @@
 from obdlib.elm327 import NO_RESULT
+from obdlib.logging import logger
 
 
 class Base(object):
-
     def __init__(self):
         # see ELM spec. p. 25
         self.protocols = {
@@ -63,9 +63,9 @@ class Base(object):
         }
         if data[0][0:2] == '7F':
             # logging error
-            print('Error: mode {} - {}'.format(data[0][2:4],  # mode
+            logger.error('Error: mode {} - {}'.format(data[0][2:4],  # mode
                                                codes.get(int(data[0][-2:])))  # code
-                  )
+            )
             response = False
 
         return response

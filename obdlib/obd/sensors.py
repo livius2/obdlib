@@ -1,9 +1,9 @@
 from obdlib.elm327 import NO_RESULT
 from obdlib.obd.modes import Modes
+from obdlib.logging import logger
 
 
 class Command(object):
-
     """
         This class to provide the common functionality
         to make PID's request
@@ -35,7 +35,7 @@ class Command(object):
             :param args - mode params
         """
         self.title, self.description, self.pid, \
-            self.bytes, self.unit, self.__decoder, self.kwargs = args
+        self.bytes, self.unit, self.__decoder, self.kwargs = args
 
     @property
     def ecus(self):
@@ -129,7 +129,8 @@ class Command(object):
                     dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.items())
                 )
             except Exception as err:
-                # logging error
-                print(err)
+                # logging
+                logger.error(err)
             return self
+
         return get_pid

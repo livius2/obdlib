@@ -1,4 +1,4 @@
-|build| |version|
+|build| |version| |scrutinizer|
 
 Python OBD Library
 ==================
@@ -54,8 +54,6 @@ License
 
 See LICENSE_ for details.
 
-.. |build| image:: https://travis-ci.org/s-s-boika/obdlib.svg
-    :target: https://travis-ci.org/s-s-boika/obdlib
 
 .. _pip:
     https://pypi.python.org/pypi/pip
@@ -68,3 +66,6 @@ See LICENSE_ for details.
 
 .. |version| image:: https://badge.fury.io/py/obdlib.svg
     :target: https://pypi.python.org/pypi/obdlib/
+
+.. |scrutinizer| image:: https://scrutinizer-ci.com/g/s-s-boika/obdlib/badges/quality-score.png?b=master
+    :target: https://scrutinizer-ci.com/g/s-s-boika/obdlib

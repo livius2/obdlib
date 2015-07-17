@@ -16,14 +16,14 @@ Installation
 
 Install using pip_
 
-.. code - block:: bash
+.. code-block:: bash
 
     $ pip install obdlib
 
 Quick start
 -----------
 
-.. code - block:: python
+.. code-block:: python
 
     from obdlib.obd.scanner import OBDScanner
 
@@ -53,6 +53,7 @@ License
 -------
 
 See LICENSE_ for details.
+
 .. |build| image:: https://travis-ci.org/s-s-boika/obdlib.svg
     :target: https://travis-ci.org/s-s-boika/obdlib
 

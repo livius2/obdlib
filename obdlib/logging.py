@@ -1,7 +1,8 @@
 from sys import stdout
 import time
 
-def asctime(t = None):
+
+def asctime(t=None):
     """
     Converts the 8-tuple which contains:
     (year, month, mday, hour, minute, second, weekday, yearday)
@@ -26,21 +27,20 @@ def asctime(t = None):
 
 
 class Logging():
-
     entry_format = "{time} : {pfx} : {log_lvl} : {msg}\n"
 
     prefix = 'OBDLIB'
 
     __logging_levels = (
-    'CRITICAL', #0
-    'ERROR',    #1
-    'WARNING',  #2
-    'INFO',     #3
-    'DEBUG',    #4
-    'NOTSET',   #5,-1
+        'CRITICAL',  # 0
+        'ERROR',  # 1
+        'WARNING',  # 2
+        'INFO',  # 3
+        'DEBUG',  # 4
+        'NOTSET',  # 5,-1
     )
 
-    def __logtime(self, t = None):
+    def __logtime(self, t=None):
         """
         Converts the 8-tuple which contains:
         (year, month, mday, hour, minute, second, weekday, yearday)
@@ -53,7 +53,7 @@ class Logging():
         return result
 
     def get_log_level(self, log_level):
-        if log_level > len(self.__logging_levels)-1:
+        if log_level > len(self.__logging_levels) - 1:
             log_level = -1
         return self.__logging_levels[log_level]
 
@@ -62,13 +62,18 @@ class Logging():
         self.output_stream = output
         self.log_level = log_level
 
-    def __call__(self, msg, level = 5, force = False):
+    def __call__(self, msg, level=5, force=False):
         if level > self.log_level:
             return
-        out_msg = self.entry_format.format(time = self.__logtime(),
-                                           pfx = self.prefix,
-                                           log_lvl = self.get_log_level(level),
-                                           msg = str(msg))
+        out_msg = self.entry_format.format(time=self.__logtime(),
+                                           pfx=self.prefix,
+                                           log_lvl=self.get_log_level(level),
+                                           msg=str(msg))
+
+        if self.output_stream:
+            # saves logging message
+            with open(self.output_stream, 'wb') as stream:
+                stream.write(out_msg)
 
         if self.use_stdout or force:
             stdout.write(out_msg)
@@ -92,4 +97,4 @@ class Logging():
         return self(msg, 5)
 
 
-logger = Logging()
+logger = Logging(log_level=2)

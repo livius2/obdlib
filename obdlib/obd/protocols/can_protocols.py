@@ -1,8 +1,8 @@
 from obdlib.obd.protocols.base import Base
+from obdlib.logging import logger
 
 
 class ProtocolsCan(Base):
-
     """
         Supports the CAN protocol (from 6 ...)
     """
@@ -72,7 +72,7 @@ class ProtocolsCan(Base):
                                 # 18 DA F1 10 06 41 00 FF FF FF FF FC
                                 count_byte = int(message[9], 16)
                                 data[ecu_number] = message[
-                                    10:10 + count_byte * 2][data_start_byte:]
+                                                   10:10 + count_byte * 2][data_start_byte:]
 
                             # multi line frame
                             # the First Frame (of a multi frame message)
@@ -95,8 +95,9 @@ class ProtocolsCan(Base):
                             elif f_type == self.mess_CF:
                                 data[ecu_number] += message[10:]
                     else:
-                        # logging error
-                        raise Exception("Error response data")
+                        mess = "Error response data"
+                        logger.error(mess)
+                        raise Exception(mess)
 
         return data
 

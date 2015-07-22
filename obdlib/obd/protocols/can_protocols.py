@@ -24,6 +24,8 @@ class ProtocolsCan(Base):
         self.header_bits = self.__get_bits(number)
         self.header_11 = 11
         self.header_29 = 29
+        self.frame_start = 10
+        self.data_start_byte = 4
 
     def create_data(self, raw_data):
         """
@@ -41,27 +43,23 @@ class ProtocolsCan(Base):
                 if self.header:
                     # multi line (ELM spec page 42) or single frame response
                     if len(ecu_messages):
-                        data_start_byte = 4
+                        self.data_start_byte = 4
                         # sorts ECU's messages
                         ecu_messages = sorted(ecu_messages)
 
                         if self.header_bits == self.header_11:
-                            # align CAN header (11 bits, 29 bits)
+                            # align CAN header (11 bits to 29 bits)
                             # PCI byte are 8 and 9 indexes
-                            ecu_messages = [
-                                self.add_bits +
-                                mess for mess in ecu_messages]
+                            ecu_messages = self.__align_frame(ecu_messages)
 
                         for message in ecu_messages:
-                            ecu_number = message[6:8]
-                            f_type = int(message[8], 16)
-                            response_mode = int(message[10:12])
+                            ecu_number, f_type, response_mode = self.__get_frame_params(message)
 
                             # check if response trouble codes
                             if response_mode == 43:
                                 # add fake byte after the mode one
                                 # nothing to do
-                                data_start_byte = 2
+                                self.data_start_byte = 2
 
                             # Single Frame
                             if f_type == self.mess_SF:
@@ -70,9 +68,7 @@ class ProtocolsCan(Base):
                                 #
                                 # 29 bits header:
                                 # 18 DA F1 10 06 41 00 FF FF FF FF FC
-                                count_byte = int(message[9], 16)
-                                data[ecu_number] = message[
-                                                   10:10 + count_byte * 2][data_start_byte:]
+                                data[ecu_number] = self.__get_single_data(message)
 
                             # multi line frame
                             # the First Frame (of a multi frame message)
@@ -89,17 +85,57 @@ class ProtocolsCan(Base):
                             # 18 DA F1 10 21 32 38 39 34 39 41 43
                             # 18 DA F1 10 22 00 00 00 00 00 00 31
                             elif f_type == self.mess_FF:
-                                data[ecu_number] = message[10:]
+                                data[ecu_number] = message[self.frame_start:]
 
                             # the Consecutive Frame
                             elif f_type == self.mess_CF:
-                                data[ecu_number] += message[10:]
+                                data[ecu_number] += message[self.frame_start:]
                     else:
                         mess = "Error response data"
                         logger.error(mess)
                         raise Exception(mess)
 
         return data
+
+    def __get_single_data(self, message):
+        """
+            Retrieves data from the single frame
+            :param message - the OBD frame
+            :return string
+        """
+        return message[self.frame_start:self.__last_bytes(self.__digit(message[9]))][self.data_start_byte:]
+
+    def __last_bytes(self, count_byte):
+        """
+            Counts the last bytes
+        """
+        return self.frame_start + count_byte * 2
+
+    def __get_frame_params(self, frame):
+        """
+            Retrieves some params from the frame
+            :param frame - the OBD frame
+            :return tuple of ecu_number, frame_type, response_mode
+        """
+        return (
+            frame[6:8],
+            self.__digit(frame[8]),
+            int(frame[10:12])
+        )
+
+    def __align_frame(self, frame):
+        """
+            Align CAN header (11 bits to 29 bits)
+            :param frame - the OBD frame
+        """
+        return [self.add_bits + mess for mess in frame]
+
+    @staticmethod
+    def __digit(value):
+        """
+            Hex to int
+        """
+        return int(value, 16)
 
     def __get_bits(self, n):
         """

@@ -16,6 +16,31 @@ class TestProtocolsCan(unittest.TestCase):
         bits = self.pc._ProtocolsCan__get_bits(6)
         self.assertEqual(bits, 11)
 
+    def test___digit(self):
+        digit = self.pc._ProtocolsCan__digit('A')
+        self.assertEqual(digit, 10)
+
+    def test___last_bytes(self):
+        expected = 12
+        self.pc.frame_start = 4
+        last = self.pc._ProtocolsCan__last_bytes(4)
+        self.assertEqual(last, expected)
+
+    def test___align_frame(self):
+        frame = self.pc._ProtocolsCan__align_frame(['7E8064100FFFFFFFFFC'])
+        self.assertIn('000007E8064100FFFFFFFFFC', frame)
+
+    def test___get_single_data(self):
+        data = self.pc._ProtocolsCan__get_single_data('000007E8064100FFFFFFFFFC')
+        self.assertEqual(data, 'FFFFFFFF')
+
+    def test___get_frame_params(self):
+        params = self.pc._ProtocolsCan__get_frame_params('000007E8064100FFFFFFFFFC')
+        self.assertIsInstance(params, tuple)
+        self.assertEqual(params[0], 'E8')  # ECU
+        self.assertEqual(params[1], 0)  # Frame type
+        self.assertEqual(params[2], 41)  # Mode
+
     @mock.patch('sys.stdout')
     def test_create_data(self, mock_out):
         # NO DATA

@@ -16,7 +16,7 @@ Installation
 
 Install using pip_
 
-.. code - block:: bash
+.. code-block:: bash
 
     $ pip install obdlib
 

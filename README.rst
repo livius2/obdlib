@@ -1,4 +1,4 @@
-|build| |version| |scrutinizer|
+|build| |version|
 
 Python OBD Library
 == == == == == == == == ==

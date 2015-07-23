@@ -150,26 +150,7 @@ class OBDScanner(object):
             :return: the data returned by the OBD-II Scanner
         """
         if self.is_port():
-            retry_number = 0
-            value = b''
-            while True:
-                data = self.uart_port.read(1)
-
-                if data == b'>':
-                    break
-
-                # ignore incoming bytes that are of value 00 (NULL)
-                if data == b'\x00':
-                    continue
-
-                if len(data) == 0:
-                    if retry_number >= elm327.DEFAULT_RETRIES:
-                        break
-                    retry_number += 1
-                    continue
-
-                value += data
-
+            value = self.collect_data()
             if value:
                 return Response(value, self.get_proto_num())
         else:
@@ -178,6 +159,34 @@ class OBDScanner(object):
             raise Exception(mess)
 
         return Response()
+
+    def collect_data(self):
+        """
+            Listens an UART port and
+            retrieves data from one
+        """
+        retry_number = 0
+        value = b''
+        while True:
+            data = self.uart_port.read(1)
+
+            if data == b'>':
+                break
+
+            # ignore incoming bytes that are of value 00 (NULL)
+            if data == b'\x00':
+                continue
+
+            if len(data) == 0:
+                if retry_number >= elm327.DEFAULT_RETRIES:
+                    break
+                retry_number += 1
+                continue
+
+            value += data
+        return value
+
+
 
     def reset(self):
         """

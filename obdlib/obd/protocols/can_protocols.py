@@ -1,5 +1,4 @@
 from obdlib.obd.protocols.base import Base
-from obdlib.logging import logger
 
 
 class ProtocolsCan(Base):
@@ -40,28 +39,34 @@ class ProtocolsCan(Base):
             if self.check_message(ecu_messages):
                 # if the header enabled
                 if self.header:
-                    # multi line (ELM spec page 42) or single frame response
-                    self.data_start_byte = 4
-                    # sorts ECU's messages
-                    ecu_messages = sorted(ecu_messages)
-
-                    if self.check_header():
-                        # align CAN header (11 bits to 29 bits)
-                        # PCI byte are 8 and 9 indexes
-                        ecu_messages = self.__align_frame(ecu_messages)
-
-                    for message in ecu_messages:
-                        ecu_number, f_type, response_mode = self.__get_frame_params(message)
-
-                        # check if response trouble codes
-                        if response_mode == 43:
-                            # add fake byte after the mode one
-                            # nothing to do
-                            self.data_start_byte = 2
-
-                        self.__process(data, message, ecu_number, f_type)
-
+                    data = self.process_data(ecu_messages)
         return data
+
+    def process_data(self, ecu_messages):
+        data = {}
+        # multi line (ELM spec page 42) or single frame response
+        self.data_start_byte = 4
+        # sorts ECU's messages
+        ecu_messages = sorted(ecu_messages)
+
+        ecu_messages = self.check_frame(ecu_messages)
+        for message in ecu_messages:
+            ecu_number, f_type, response_mode = self.__get_frame_params(message)
+            # check if response trouble codes
+            if response_mode == 43:
+                # add fake byte after the mode one
+                # nothing to do
+                self.data_start_byte = 2
+
+            self.__process(data, message, ecu_number, f_type)
+        return data
+
+    def check_frame(self, frame):
+        if self.check_header():
+            # align CAN header (11 bits to 29 bits)
+            # PCI byte are 8 and 9 indexes
+            frame = self.__align_frame(frame)
+        return frame
 
     def check_header(self):
         """
@@ -106,7 +111,8 @@ class ProtocolsCan(Base):
             :param message - the OBD frame
             :return string
         """
-        return message[self.frame_start:self.__last_bytes(self.__digit(message[9]))][self.data_start_byte:]
+        return message[self.frame_start:self.__last_bytes(
+            self.__digit(message[9]))][self.data_start_byte:]
 
     def __last_bytes(self, count_byte):
         """

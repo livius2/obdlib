@@ -13,7 +13,8 @@ class Command(object):
         """
             Init the common params
             :param call_obd: request function
-            :param units: flag of conversion (0 - Europe, 1 - English, ex: km/h - > mph)
+            :param units: flag of conversion (0 - Europe, 1 - English,
+            ex: km/h - > mph)
         """
         self.__modes = Modes(units)
         self.__call = call_obd
@@ -64,14 +65,24 @@ class Command(object):
         """
         self.__pids = {}
         pids = self[1]('00')  # 01 00
-        if pids and isinstance(pids.__ecus, dict) and len(pids.__ecus):
+        if self.is_ecus(pids):
             self.__pids.update(pids.__ecus)
-            for ecu in self.__pids.keys():
-                if self.__pids[ecu].get('20'):  # add 21-40 pids if available
-                    self.__pids[ecu].update(self[1]('20').__ecus[ecu])
-                if self.__pids[ecu].get('40'):  # add 41-60 pids if available
-                    self.__pids[ecu].update(self[1]('40').__ecus[ecu])
+            self.add_pids()
             return True
+
+    def add_pids(self):
+        for ecu in self.__pids.keys():
+            if self.__pids[ecu].get('20'):  # add 21-40 pids if available
+                self.__pids[ecu].update(
+                    self[1]('20').__ecus[ecu]
+                )
+            if self.__pids[ecu].get('40'):  # add 41-60 pids if available
+                self.__pids[ecu].update(
+                    self[1]('40').__ecus[ecu]
+                )
+
+    def is_ecus(self, pids):
+        return pids and isinstance(pids.__ecus, dict) and len(pids.__ecus)
 
     def is_pids(self, check=True):
         """

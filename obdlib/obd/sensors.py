@@ -99,6 +99,21 @@ class Command(object):
 
         return value
 
+    def _process(self):
+        """
+            Decodes OBD data
+        """
+        return dict(
+            [k, self._set_value(v)]
+            for k, v in self.__call(self.pid).value.items()
+        )
+
+    def _is_supported(self, pid):
+        """
+            Checks an available PID
+        """
+        return pid != '00' and not self.is_pids(pid)
+
     def __getitem__(self, mode):
         self.__ecus = {}
 
@@ -108,7 +123,7 @@ class Command(object):
                     raise Exception("PID {} must be a string.".format(pid))
 
                 # checks unsupported PIDs
-                if pid != '00' and not self.is_pids(pid):
+                if self._is_supported(pid):
                     raise Exception(
                         "Unsupported command. {} PID {}".format(
                             mode,
@@ -125,9 +140,7 @@ class Command(object):
                             pid))
 
                 self.init(pid_info)
-                self.__ecus.update(
-                    dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.items())
-                )
+                self.__ecus.update(self._process())
             except Exception as err:
                 # logging
                 logger.error(err)

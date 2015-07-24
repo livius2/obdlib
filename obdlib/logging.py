@@ -21,12 +21,12 @@ def asctime(t=None):
     ]
 
     t[1] = month_name[t[1]]
-    t[6] - day_name[t[6]]
+    t[6] = day_name[t[6]]
     result = "{6} {1} {2:02} {3:02}:{4:02}:{5:02} {0}\n".format(*t)
     return result
 
 
-class Logging():
+class Logging(object):
     entry_format = "{time} : {pfx} : {log_lvl} : {msg}\n"
 
     prefix = 'OBDLIB'
@@ -65,18 +65,24 @@ class Logging():
     def __call__(self, msg, level=5, force=False):
         if level > self.log_level:
             return
-        out_msg = self.entry_format.format(time=self.__logtime(),
-                                           pfx=self.prefix,
-                                           log_lvl=self.get_log_level(level),
-                                           msg=str(msg))
+        out_msg = self.msg_format(msg, level)
 
-        if self.output_stream:
-            # saves logging message
-            with open(self.output_stream, 'wb') as stream:
-                stream.write(out_msg)
+        self.save_msg(self.output_stream, out_msg)
 
         if self.use_stdout or force:
             stdout.write(out_msg)
+
+    def save_msg(self, stream, msg):
+        if self.output_stream:
+            # saves logging message
+            with open(self.output_stream, 'wb') as stream:
+                stream.write(msg)
+
+    def msg_format(self, msg, level):
+        return self.entry_format.format(time=self.__logtime(),
+                                        pfx=self.prefix,
+                                        log_lvl=self.get_log_level(level),
+                                        msg=str(msg))
 
     def critical(self, msg):
         return self(msg, 0)

@@ -24,23 +24,27 @@ class Protocols(Base):
 
             if self.check_message(ecu_messages):
                 if self.header:
-                    self.check_sum = -2
-                    # sorts ECU's messages
-                    ecu_messages = sorted(ecu_messages)
-                    service_data = self._parse_headers(ecu_messages)
-                    for message in ecu_messages:
-                        # if one ECU returns multi line
-                        # multi line includes line number byte
-                        ecu_number, response_mode = self._get_frame_params(message)
+                    data = self.process_data(ecu_messages)
+        return data
 
-                        # check if response trouble codes
-                        if response_mode == 43:
-                            # add fake byte after the mode one
-                            message = self._add_additional_byte(message)
-                            self.check_sum = None
+    def process_data(self, ecu_messages):
+        data = {}
+        self.check_sum = -2
+        # sorts ECU's messages
+        ecu_messages = sorted(ecu_messages)
+        service_data = self._parse_headers(ecu_messages)
+        for message in ecu_messages:
+            # if one ECU returns multi line
+            # multi line includes line number byte
+            ecu_number, response_mode = self._get_frame_params(message)
 
-                        self._process(data, message, ecu_number, service_data[ecu_number])
+            # check if response trouble codes
+            if response_mode == 43:
+                # add fake byte after the mode one
+                message = self._add_additional_byte(message)
+                self.check_sum = None
 
+            self._process(data, message, ecu_number, service_data[ecu_number])
         return data
 
     def _process(self, data, message, ecu_number, multi):

@@ -12,13 +12,14 @@ class TestUtils(unittest.TestCase):
 
     def test_speed(self):
         # unit_english == 0
-        assert utils.speed('00') == 0.0
-        assert utils.speed('FF') == 255
+        self.assertEquals(utils.speed('00'), 0.0)
+        self.assertEquals(utils.speed('FF'), 255)
 
+    def test_speed_english(self):
         # unit_english == 1
         utils.unit_english = 1
-        assert utils.speed('00') == 0.0
-        assert utils.speed('FF') == 158.44965396
+        self.assertEqual(utils.speed('00'), 0.0)
+        self.assertEqual(utils.speed('FF'), 158.44965396)
 
     def test_load_value(self):
         self.assertEqual(utils.load_value('00'), 0)
@@ -62,9 +63,12 @@ class TestUtils(unittest.TestCase):
     def test_air_status(self):
         self.assertIsNone(utils.air_status('00'))
         self.assertEqual(utils.air_status('01'), 'Upstream')
-        self.assertEqual(utils.air_status('02'), 'Downstream of catalytic converter')
-        self.assertEqual(utils.air_status('04'), 'From the outside atmosphere or off')
-        self.assertEqual(utils.air_status('08'), 'Pump commanded on for diagnostics')
+        self.assertEqual(utils.air_status('02'),
+                         'Downstream of catalytic converter')
+        self.assertEqual(utils.air_status('04'),
+                         'From the outside atmosphere or off')
+        self.assertEqual(utils.air_status('08'),
+                         'Pump commanded on for diagnostics')
 
     def test_voltage(self):
         self.assertEqual(utils.voltage('00'), 0)
@@ -81,7 +85,8 @@ class TestUtils(unittest.TestCase):
 
     def test_obd_standards(self):
         self.assertEqual(utils.obd_standards('FF'), None)
-        self.assertEqual(utils.obd_standards('01'), 'OBD-II as defined by the CARB')
+        self.assertEqual(utils.obd_standards('01'),
+                         'OBD-II as defined by the CARB')
 
     def test_time(self):
         self.assertEqual(utils.time('0000'), 0)
@@ -104,8 +109,7 @@ class TestUtils(unittest.TestCase):
     def test_vin(self):
         self.assertEqual(utils.vin(
             '0000003144344750303052353542313233343536'),
-            '1D4GP00R55B123456'
-        )
+            '1D4GP00R55B123456')
 
     def test_ecu_name(self):
         self.assertEqual(utils.ecu_name(
@@ -134,11 +138,13 @@ class TestUtils(unittest.TestCase):
 
     def test_dtc_statuses(self):
         expected = {'base_tests': [(0, 0), (0, 1), (0, 1)],
-                    'compression_tests': [(0, 0), (1, 0), (0, 0), (1, 1), (0, 0), (1, 0)],
+                    'compression_tests': [(0, 0), (1, 0), (0, 0),
+                                          (1, 1), (0, 0), (1, 0)],
                     'dtc': 3,
                     'ignition_test': 0,
                     'mil': 1,
-                    'spark_tests': [(0, 0), (1, 0), (1, 0), (0, 0), (0, 0), (1, 1), (0, 0), (1, 0)]}
+                    'spark_tests': [(0, 0), (1, 0), (1, 0), (0, 0),
+                                    (0, 0), (1, 1), (0, 0), (1, 0)]}
         statuses = utils.dtc_statuses('83076504')
         self.assertEqual(statuses, expected)
 

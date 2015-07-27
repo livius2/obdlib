@@ -1,7 +1,7 @@
 |build| |version| |scrutinizer| |coverage|
 
 Python OBD Library
-== == == == == == == == ==
+==================
 
 OBD Lib provides easy access to ELM327 OBD - II Interfaces in Python.
 It's been successfully used with ELM327 OBD - II bluetooth scanners and the Raspberry Pi to create portable automotive
@@ -60,12 +60,10 @@ License
 -------
 
 See LICENSE_ for details.
-.. |build| image:: https://travis-ci.org/s-s-boika/obdlib.svg
-       :target: https://travis-ci.org/s-s-boika/obdlib
+
 
 .. _pip:
-    https:
-        //pypi.python.org / pypi / pip
+    https://pypi.python.org/pypi/pip
 
 .. _LICENSE:
     LICENSE.txt

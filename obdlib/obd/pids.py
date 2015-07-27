@@ -167,3 +167,40 @@ DTCs_table = {
     'F': 'U3'
 
 }
+
+from obdlib.utils import *
+
+
+class Pids(object):
+    """
+        Retrieves pid info from the mode file
+        gets a necessary pid only
+    """
+
+    def __init__(self):
+        self.mode = 0
+        self.command_path = "obdlib/obd/commands/pids.{}"
+
+    def set_mode(self, mode):
+        """
+            Sets the current mode
+            :param mode: integer - current mode
+            :return self
+        """
+        self.mode = mode
+        return self
+
+    def __getitem__(self, item):
+        """
+            Gets one pid only
+            :param item: integer - the pid number
+            :return pid: tuple - params about pid
+        """
+        pid = ()
+        with open(self.command_path.format(self.mode)) as pids:
+            for index, value in enumerate(pids):
+                if index == item:
+                    pid = eval(value)
+                    break
+
+        return pid

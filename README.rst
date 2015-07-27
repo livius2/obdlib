@@ -1,4 +1,4 @@
-|build| |version| |scrutinizer|
+|build| |version| |scrutinizer| |coverage|
 
 Python OBD Library
 ==================
@@ -25,19 +25,26 @@ Quick start
 
 .. code-block:: python
 
-    from obdlib.obd.scanner import OBDScanner
+    import obdlib.scanner as scanner
+    import time
 
-    with OBDScanner() as obd:
-        print('ELM version'.format(obd.elm_version))
-        print('Vehicle Identification Number (VIN): {0}'.format(
-            obd.vehicle_id_number()))
-        print('Engine Control Unit (ECU) Name: {0}'.format(obd.ecu_name()))
-        print('Battery voltage: {0}'.format(obd.battery_voltage()))
-        print('Fuel type: {0}'.format(obd.fuel_type()))
-        print('Coolant temp: {0}'.format(
-            obd.current_engine_coolant_temperature()))
-        print('Oil temp: {0}'.format(obd.current_engine_oil_temperature()))
-        print('Engine RPM: {0}'.format(obd.current_engine_rpm()))
+    # Example 1
+    # Retrieves value from one sensor
+    with scanner.OBDScanner("/dev/pts/6") as scan:
+        while True:
+            if scan.sensor:
+                if scan.sensor.is_pids():
+                    # Engine coolant temperature
+                    sensor = scan.sensor[1]('05')
+                    # two or more ECU's respond to one request
+                    # we should be prepared for it
+                    for ecu, value in sensor.ecus:
+                        print("ECU: {} Sensor {}: {} {}".format(ecu, sensor.title, value, sensor.unit))
+                    time.sleep(0.5)
+                else:
+                    raise Exception("Pids are not supported")
+            else:
+                break
 
 Supported Python Versions
 -------------------------
@@ -68,4 +75,7 @@ See LICENSE_ for details.
     :target: https://pypi.python.org/pypi/obdlib/
 
 .. |scrutinizer| image:: https://scrutinizer-ci.com/g/s-s-boika/obdlib/badges/quality-score.png?b=master
-    :target: https://scrutinizer-ci.com/g/s-s-boika/obdlib
+    :target: https://scrutinizer-ci.com/g/s-s-boika/obdlib/
+
+.. |coverage| image:: https://scrutinizer-ci.com/g/s-s-boika/obdlib/badges/coverage.png?b=master
+    :target: https://scrutinizer-ci.com/g/s-s-boika/obdlib/

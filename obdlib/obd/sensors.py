@@ -13,7 +13,8 @@ class Command(object):
         """
             Init the common params
             :param call_obd: request function
-            :param units: flag of conversion (0 - Europe, 1 - English, ex: km/h - > mph)
+            :param units: flag of conversion (0 - Europe, 1 - English,
+            ex: km/h - > mph)
         """
         self.__modes = Modes(units)
         self.__call = call_obd
@@ -52,10 +53,13 @@ class Command(object):
         """
         for ecu, pids in self.__pids.items():
             for pid, access in pids.items():
-                if not access or int(pid, 16) in (0, 32, 64,):
+                if self.is_not_access(access, pid):
                     continue
                 self[mode](pid)
                 yield self
+
+    def is_not_access(self, access, pid):
+        return not access or int(pid, 16) in (0, 32, 64,)
 
     def check_pids(self):
         """
@@ -64,14 +68,20 @@ class Command(object):
         """
         self.__pids = {}
         pids = self[1]('00')  # 01 00
-        if pids and isinstance(pids.__ecus, dict) and len(pids.__ecus):
+        if self.is_ecus(pids):
             self.__pids.update(pids.__ecus)
-            for ecu in self.__pids.keys():
-                if self.__pids[ecu].get('20'):  # add 21-40 pids if available
-                    self.__pids[ecu].update(self[1]('20').__ecus[ecu])
-                if self.__pids[ecu].get('40'):  # add 41-60 pids if available
-                    self.__pids[ecu].update(self[1]('40').__ecus[ecu])
+            self.add_pids()
             return True
+
+    def add_pids(self):
+        for ecu in self.__pids.keys():
+            if self.__pids[ecu].get('20'):  # add 21-40 pids if available
+                self.__pids[ecu].update(self[1]('20').__ecus[ecu])
+            if self.__pids[ecu].get('40'):  # add 41-60 pids if available
+                self.__pids[ecu].update(self[1]('40').__ecus[ecu])
+
+    def is_ecus(self, pids):
+        return pids and isinstance(pids.__ecus, dict) and len(pids.__ecus)
 
     def is_pids(self, check=True):
         """
@@ -99,35 +109,51 @@ class Command(object):
 
         return value
 
+    def _process(self):
+        """
+            Decodes OBD data
+        """
+        return dict(
+            [k, self._set_value(v)]
+            for k, v in self.__call(self.pid).value.items()
+        )
+
+    def _process_pid(self, mode, pid):
+        if not isinstance(pid, str):
+            raise Exception("PID {} must be a string.".format(pid))
+
+        # checks unsupported PIDs
+        if self._is_supported(pid):
+            raise Exception(
+                "Unsupported command. {} PID {}".format(
+                    mode,
+                    pid))
+
+        pid = int(pid, 16)
+        pid_info = self.__modes.modes[mode][pid]
+
+        if not pid_info:
+            # if command does not describe in the modes class
+            raise Exception(
+                "Unsupported command. {} PID {}".format(
+                    mode,
+                    pid))
+
+        self.init(pid_info)
+        self.__ecus.update(self._process())
+
+    def _is_supported(self, pid):
+        """
+            Checks an available PID
+        """
+        return pid != '00' and not self.is_pids(pid)
+
     def __getitem__(self, mode):
         self.__ecus = {}
 
         def get_pid(pid='00'):
             try:
-                if not isinstance(pid, str):
-                    raise Exception("PID {} must be a string.".format(pid))
-
-                # checks unsupported PIDs
-                if pid != '00' and not self.is_pids(pid):
-                    raise Exception(
-                        "Unsupported command. {} PID {}".format(
-                            mode,
-                            pid))
-
-                pid = int(pid, 16)
-                pid_info = self.__modes.modes[mode][pid]
-
-                if not pid_info:
-                    # if command does not describe in the modes class
-                    raise Exception(
-                        "Unsupported command. {} PID {}".format(
-                            mode,
-                            pid))
-
-                self.init(pid_info)
-                self.__ecus.update(
-                    dict([k, self._set_value(v)] for k, v in self.__call(self.pid).value.items())
-                )
+                self._process_pid(mode, pid)
             except Exception as err:
                 # logging
                 logger.error(err)

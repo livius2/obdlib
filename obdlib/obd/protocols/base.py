@@ -24,6 +24,9 @@ class Base(object):
     def create_data(self, data):
         raise NotImplementedError()
 
+    def check_message(self, ecu_messages):
+        return self.check_result(ecu_messages) and self.check_error(ecu_messages)
+
     @classmethod
     def remove_searching(cls, data):
         """
@@ -64,7 +67,7 @@ class Base(object):
         if data[0][0:2] == '7F':
             # logging error
             logger.error('Error: mode {} - {}'.format(data[0][2:4],  # mode
-                                               codes.get(int(data[0][-2:])))  # code
+                                                      codes.get(int(data[0][-2:])))  # code
             )
             response = False
 

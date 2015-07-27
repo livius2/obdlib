@@ -68,14 +68,14 @@ See LICENSE_ for details.
 .. _LICENSE:
     LICENSE.txt
 
-.. |build| image:: https://travis-ci.org/QualiApps/obdlib.svg
-    :target: https://travis-ci.org/QualiApps/obdlib
+.. |build| image:: https://travis-ci.org/s-s-boika/obdlib.svg
+    :target: https://travis-ci.org/s-s-boika/obdlib
 
 .. |version| image:: https://badge.fury.io/py/obdlib.svg
     :target: https://pypi.python.org/pypi/obdlib/
 
-.. |scrutinizer| image:: https://scrutinizer-ci.com/g/QualiApps/obdlib/badges/quality-score.png?b=master
-    :target: https://scrutinizer-ci.com/g/QualiApps/obdlib/
+.. |scrutinizer| image:: https://scrutinizer-ci.com/g/s-s-boika/obdlib/badges/quality-score.png?b=master
+    :target: https://scrutinizer-ci.com/g/s-s-boika/obdlib/
 
-.. |coverage| image:: https://scrutinizer-ci.com/g/QualiApps/obdlib/badges/coverage.png?b=master
-    :target: https://scrutinizer-ci.com/g/QualiApps/obdlib/
+.. |coverage| image:: https://scrutinizer-ci.com/g/s-s-boika/obdlib/badges/coverage.png?b=master
+    :target: https://scrutinizer-ci.com/g/s-s-boika/obdlib/

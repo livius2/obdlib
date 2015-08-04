@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name="obdlib",
-    version="0.2",
+    version="0.2.1",
     license="MIT",
     author="Siarhei Boika",
     author_email="s.s.boika@gmail.com",

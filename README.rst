@@ -20,6 +20,16 @@ Install using pip_
 
     $ pip install obdlib
 
+
+Installation for micropython
+------------
+
+For installing run:
+
+.. code-block:: bash
+
+    $ MICROPYPATH='path-to-pyboard' pip-micropython install obdlib
+
 Quick start
 -----------
 

@@ -12,8 +12,8 @@ class TestUtils(unittest.TestCase):
 
     def test_speed(self):
         # unit_english == 0
-        self.assertEquals(utils.speed('00'), 0.0)
-        self.assertEquals(utils.speed('FF'), 255)
+        self.assertEqual(utils.speed('00'), 0.0)
+        self.assertEqual(utils.speed('FF'), 255)
 
     def test_speed_english(self):
         # unit_english == 1

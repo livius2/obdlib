@@ -13,43 +13,23 @@ class TestResponse(unittest.TestCase):
     def setUp(self):
         pass
 
-    @mock.patch('obdlib.obd.protocols.protocols.Protocols')
-    @mock.patch('obdlib.obd.protocols.can_protocols.ProtocolsCan')
-    def test___init__(self, mock_can_proto, mock_proto):
+    def test___init__(self):
         # Old protocols
         expected_raw_data = []
         resp = response.Response()
-        self.assertEqual(mock_proto.call_count, 1)
-        self.assertEqual(mock_proto.call_args_list[0][0], ())
-        self.assertEqual(mock_can_proto.call_count, 0)
         self.assertEqual(resp.raw_data, expected_raw_data)
 
-        mock_proto.reset_mock()
-        mock_can_proto.reset_mock()
         expected_raw_data = ['ATZ']
         resp = response.Response(b'ATZ\r\n')
-        self.assertEqual(mock_proto.call_count, 1)
-        self.assertEqual(mock_proto.call_args_list[0][0], ())
-        self.assertEqual(mock_can_proto.call_count, 0)
         self.assertEqual(resp.raw_data, expected_raw_data)
 
         # CAN protocols
-        mock_proto.reset_mock()
-        mock_can_proto.reset_mock()
         expected_raw_data = []
         resp = response.Response(b'', 6)
-        self.assertEqual(mock_proto.call_count, 0)
-        self.assertEqual(mock_can_proto.call_count, 1)
-        self.assertEqual(mock_can_proto.call_args_list[0][0], (6,))
         self.assertEqual(resp.raw_data, expected_raw_data)
 
-        mock_proto.reset_mock()
-        mock_can_proto.reset_mock()
         expected_raw_data = ['ATZ']
         resp = response.Response(b'ATZ\r\n', 6)
-        self.assertEqual(mock_proto.call_count, 0)
-        self.assertEqual(mock_can_proto.call_count, 1)
-        self.assertEqual(mock_can_proto.call_args_list[0][0], (6,))
         self.assertEqual(resp.raw_data, expected_raw_data)
 
     @unittest.skip("_check_value")
@@ -60,7 +40,7 @@ class TestResponse(unittest.TestCase):
         expected_data = {'E8': 'FFFFFFFF'}
         car_response = b'7E8 06 41 00 FF FF FF FF FC\r\n'
         resp = response.Response(car_response, 6)
-        resp.protocol.create_data = mock.Mock()
+        resp.protocol = mock.Mock()
         resp.protocol.create_data.return_value = expected_data
         value = resp.value
         self.assertEqual(resp.protocol.create_data.call_count, 1)

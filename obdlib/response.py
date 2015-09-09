@@ -1,11 +1,10 @@
-from obdlib.obd.protocols import protocols, can_protocols
-
-
 class Response(object):
     """
         This object contains response data and
         includes the common data analyzing
     """
+
+    __slots__ = ['raw_data', 'protocol', 'proto_num']
 
     def __init__(self, data=b'', proto_num=0):
         # convert to string
@@ -14,9 +13,8 @@ class Response(object):
         buff = data.decode().replace('\n', '').split('\r')
         self.raw_data = [line.strip().replace(' ', '')
                          for line in buff if line]
-        # init protocol (CAN or rest)
-        self.protocol = can_protocols.ProtocolsCan(
-            proto_num) if proto_num > 5 else protocols.Protocols()
+        self.protocol = None
+        self.proto_num = proto_num
 
     def _check_value(func):
         """
@@ -39,6 +37,13 @@ class Response(object):
             Retrieves useful value from data
             :return dictionary: key - ECU, value - frame data
         """
+        # init protocol (CAN or rest)
+        if self.protocol is None:
+            from obdlib.obd.protocols import protocols, can_protocols
+
+            self.protocol = can_protocols.ProtocolsCan(
+                self.proto_num) if self.proto_num > 5 else protocols.Protocols()
+
         return self.protocol.create_data(self.raw_data)
 
     @property

@@ -1,29 +1,5 @@
 from sys import stdout
-import time
-
-
-def asctime(t=None):
-    """
-    Converts the 8-tuple which contains:
-    (year, month, mday, hour, minute, second, weekday, yearday)
-    into a string in the form:
-    'Sun Sep 16 01:03:52 1973\n'
-    """
-
-    t = list(t or time.lcaltime())
-    month_name = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    ]
-
-    day_name = [
-        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-    ]
-
-    t[1] = month_name[t[1]]
-    t[6] = day_name[t[6]]
-    result = "{6} {1} {2:02} {3:02}:{4:02}:{5:02} {0}\n".format(*t)
-    return result
+from time import localtime
 
 
 class Logging(object):
@@ -48,7 +24,7 @@ class Logging(object):
         '1981-05-31 01:03:59'
         """
 
-        t = t or time.localtime()
+        t = t or localtime()
         result = "{0:04}-{1:02}-{2:02} {3:02}:{4:02}:{5:02}".format(*t)
         return result
 

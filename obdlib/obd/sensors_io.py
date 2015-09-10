@@ -1,4 +1,5 @@
 from obdlib.logging import logger
+from obdlib.utils import bitwise_pids
 
 
 class CommandIO(object):
@@ -9,7 +10,9 @@ class CommandIO(object):
 
     def check_pids(self):
         pids = self["01"]("00")  # 01 00
-        return True if hasattr(pids, '__iter__') and len(pids) else False
+        if hasattr(pids, '__iter__') and len(pids):
+            pids = bitwise_pids(pids.pop()).values()
+            return True if True in pids else False
 
     def __getitem__(self, mode):
         def get_pid(pid='00'):

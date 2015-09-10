@@ -33,13 +33,6 @@ class OBDScanner(Scanner):
             vin[ecu] = value
         return vin
 
-    def battery_voltage(self):
-        """
-            Reads the vehicle's battery voltage from a connected OBD-II Scanner
-            :return: the battery voltage returned by the OBD-II Scanner
-        """
-        return self.send(elm327.BATTERY_VOLTAGE_COMMAND).at_value
-
     def get_basic_info(self):
         """
             Returns general vehicle's information
@@ -69,6 +62,13 @@ class OBDScanner(Scanner):
         gen_info['BATTERY_VOLTAGE'] = self.battery_voltage()
 
         return gen_info
+
+    def battery_voltage(self):
+        """
+            Reads the vehicle's battery voltage from a connected OBD-II Scanner
+            :return: the battery voltage returned by the OBD-II Scanner
+        """
+        return self.send(elm327.BATTERY_VOLTAGE_COMMAND).at_value
 
     def clear_trouble_codes(self):
         """

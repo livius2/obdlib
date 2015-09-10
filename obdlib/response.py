@@ -39,10 +39,14 @@ class Response(object):
         """
         # init protocol (CAN or rest)
         if self.protocol is None:
-            from obdlib.obd.protocols import protocols, can_protocols
+            if self.proto_num > 5:
+                from obdlib.obd.protocols import can_protocols
 
-            self.protocol = can_protocols.ProtocolsCan(
-                self.proto_num) if self.proto_num > 5 else protocols.Protocols()
+                self.protocol = can_protocols.ProtocolsCan(self.proto_num)
+            else:
+                from obdlib.obd.protocols import protocols
+
+                self.protocol = protocols.Protocols()
 
         return self.protocol.create_data(self.raw_data)
 
